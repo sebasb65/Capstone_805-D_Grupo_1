@@ -1,0 +1,48 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ isEditMode ? 'Editar' : 'Nuevo' }} Cultivo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="cultivoForm" (ngSubmit)="submitForm()">
+    <ion-list>
+      <ion-item>
+        <ion-input
+          label="Nombre del Cultivo/Lote"
+          labelPlacement="floating"
+          formControlName="nombre"
+          placeholder="Ej: Parcela 5 - Nogales"
+          required>
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-textarea
+          label="Descripción (opcional)"
+          labelPlacement="floating"
+          formControlName="descripcion"
+          placeholder="Ej: Sector sur, plantado en 2020">
+        </ion-textarea>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Área (Hectáreas)"
+          labelPlacement="floating"
+          type="number"
+          formControlName="area"
+          required>
+        </ion-input>
+      </ion-item>
+    </ion-list>
+    <ion-button 
+      type="submit" 
+      expand="block" 
+      class="ion-margin-top" 
+      [disabled]="cultivoForm.invalid">
+      {{ isEditMode ? 'Actualizar Cultivo' : 'Guardar Cultivo' }}
+    </ion-button>
+  </form>
+</ion-content>

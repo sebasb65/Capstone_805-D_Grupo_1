@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Gastos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding list-page-content">
+  <ng-container *ngIf="gastos$ | async as gastos; else loading">
+    <div *ngIf="gastos.length === 0" style="text-align: center; margin-top: 50px;">
+      <ion-icon name="wallet-outline" style="font-size: 5rem;"></ion-icon>
+      <h2>Sin Gastos</h2>
+      <p>Añade tu primer gasto con el botón '+'.</p>
+    </div>
+
+    <ion-list *ngIf="gastos.length > 0">
+      <ion-item-sliding *ngFor="let gasto of gastos">
+        <ion-item>
+          <ion-icon name="receipt-outline" slot="start" color="danger"></ion-icon>
+          <ion-label>
+            <h2>{{ gasto.categoria }}</h2>
+            <p>{{ gasto.descripcion }}</p>
+          </ion-label>
+          <div style="text-align: right;">
+            <span style="font-weight: bold; color: var(--ion-color-danger);">{{ gasto.monto | currency:'CLP ':'symbol':'1.0-0' }}</span><br>
+            <span style="font-size: 0.8rem; color: var(--ion-color-medium);">{{ gasto.fecha | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </ion-item>
+
+        <ion-item-options side="end">
+          <ion-item-option (click)="openModal(gasto)">
+            <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+          <ion-item-option color="danger" (click)="confirmDelete(gasto)">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  </ng-container>
+
+  <ng-template #loading>
+    <ion-list>
+      <ion-item *ngFor="let i of [1,2,3]">
+        <ion-label>
+          <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-template>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
+    <ion-fab-button>
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

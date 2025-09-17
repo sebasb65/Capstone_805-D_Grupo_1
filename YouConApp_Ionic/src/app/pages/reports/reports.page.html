@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Reportes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Reporte de Pagos</ion-card-title>
+      <ion-card-subtitle>Selecciona un rango de fechas</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="reportForm" (ngSubmit)="generateReport()">
+        <ion-item>
+          <ion-input label="Fecha de Inicio" label-placement="stacked" type="date" formControlName="fecha_inicio"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Fecha de Fin" label-placement="stacked" type="date" formControlName="fecha_fin"></ion-input>
+        </ion-item>
+        <ion-button type="submit" expand="block" class="ion-margin-top" [disabled]="reportForm.invalid">
+          Generar PDF
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

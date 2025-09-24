@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "641705056447",
+    "project_id": "youconapp-155b2",
+    "storage_bucket": "youconapp-155b2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641705056447:android:394aae6baee18c612c8e0a",
+        "android_client_info": {
+          "package_name": "com.example.youconapp_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBB0V_hi2lXK4ay0kXM_sTyUx8JGWoyfkM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641705056447:android:67162389b5c968ea2c8e0a",
+        "android_client_info": {
+          "package_name": "com.youconapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBB0V_hi2lXK4ay0kXM_sTyUx8JGWoyfkM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

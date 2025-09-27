@@ -19,3 +19,5 @@ class YouConApp extends ConsumerWidget {
     );
   }
 }
+//soy un comentario para ver si se muestra la actividad aqui, pero necesito saber como probamos que vaya funcionando, 
+//ya que en la consola de vs code uno escribe flutter run y ve como va el proyecto de manera local, asi que a investigar...

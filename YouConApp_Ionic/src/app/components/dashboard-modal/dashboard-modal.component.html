@@ -1,46 +1,64 @@
 <ion-header>
+  <!-- Barra superior del modal con título y botón para cerrar -->
   <ion-toolbar color="primary">
     <ion-title>Resumen General</ion-title>
     <ion-buttons slot="end">
+      <!-- Botón que invoca dismiss() para cerrar el modal -->
       <ion-button (click)="dismiss()">Cerrar</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Grid de Ionic para disposición responsive de estadísticas -->
   <ion-grid>
     <ion-row>
+      <!-- Columna completa: tarjeta de Total Ingresos -->
       <ion-col size="12">
         <ion-card class="stat-card success">
           <ion-card-content>
             <ion-label>Total Ingresos</ion-label>
+            <!-- Muestra el monto total de ingresos formateado en CLP -->
             <h2>{{ (totalIngresos$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
           </ion-card-content>
         </ion-card>
       </ion-col>
 
+      <!-- Columna mitad: tarjeta de Total Gastos -->
       <ion-col size="6">
         <ion-card class="stat-card danger">
           <ion-card-content>
             <ion-label>Total Gastos</ion-label>
+            <!-- Muestra el monto total de gastos formateado en CLP -->
             <h2>{{ (totalGastos$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
           </ion-card-content>
         </ion-card>
       </ion-col>
 
+      <!-- Columna mitad: tarjeta de Costo de Mano de Obra -->
       <ion-col size="6">
         <ion-card class="stat-card danger">
           <ion-card-content>
             <ion-label>Mano de Obra</ion-label>
+            <!-- Muestra el costo total de mano de obra formateado en CLP -->
             <h2>{{ (costoManoDeObra$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
           </ion-card-content>
         </ion-card>
       </ion-col>
 
+      <!-- Columna completa: tarjeta de Balance General con estilo dinámico -->
       <ion-col size="12">
-        <ion-card class="stat-card balance" [ngClass]="{'positive': (balanceGeneral$ | async)! >= 0, 'negative': (balanceGeneral$ | async)! < 0}">
+        <ion-card
+          class="stat-card balance"
+          <!-- Aplica clase 'positive' o 'negative' según el valor del balance -->
+          [ngClass]="{
+            'positive': (balanceGeneral$ | async)! >= 0,
+            'negative': (balanceGeneral$ | async)! < 0
+          }"
+        >
           <ion-card-content>
             <ion-label>Balance General</ion-label>
+            <!-- Muestra el balance formateado en CLP -->
             <h2>{{ (balanceGeneral$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
           </ion-card-content>
         </ion-card>

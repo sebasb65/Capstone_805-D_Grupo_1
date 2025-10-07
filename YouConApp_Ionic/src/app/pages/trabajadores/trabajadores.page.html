@@ -1,19 +1,29 @@
 <ion-header>
+  <!-- Barra superior con botón de retroceso y título de la página -->
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
     <ion-title>Trabajadores</ion-title>
   </ion-toolbar>
+
+  <!-- Barra con buscador para filtrar por nombre o apellido -->
   <ion-toolbar>
-    <ion-searchbar 
+    <ion-searchbar
       placeholder="Buscar por nombre o apellido"
-      (ionInput)="handleSearch($event)">
-    </ion-searchbar>
+      (ionInput)="handleSearch($event)"
+    ></ion-searchbar>
   </ion-toolbar>
+
+  <!-- Barra con selector de criterio de orden -->
   <ion-toolbar>
     <ion-item lines="none">
-      <ion-select label="Ordenar por" interface="popover" (ionChange)="handleSort($event)" value="nombre">
+      <ion-select
+        label="Ordenar por"
+        interface="popover"
+        (ionChange)="handleSort($event)"
+        value="nombre"
+      >
         <ion-select-option value="nombre">Nombre (A-Z)</ion-select-option>
         <ion-select-option value="apellido">Apellido (A-Z)</ion-select-option>
         <ion-select-option value="saldo_acumulado">Mayor Saldo</ion-select-option>
@@ -21,16 +31,19 @@
     </ion-item>
   </ion-toolbar>
 </ion-header>
-  
+
 <ion-content class="ion-padding list-page-content">
+  <!-- Contenedor principal: muestra lista de trabajadores o estado de carga -->
   <ng-container *ngIf="trabajadores$ | async as trabajadores; else loading">
     
+    <!-- Mensaje cuando no hay trabajadores registrados -->
     <div *ngIf="trabajadores.length === 0" class="empty-state">
       <ion-icon name="people-circle-outline"></ion-icon>
       <h2>Sin Trabajadores</h2>
       <p>Añade un trabajador con el botón '+'.</p>
     </div>
 
+    <!-- Lista de trabajadores si hay datos -->
     <ion-list *ngIf="trabajadores.length > 0">
       <ion-item-sliding *ngFor="let trabajador of trabajadores">
         <ion-item>
@@ -40,6 +53,8 @@
             <p>Saldo: {{ trabajador.saldo_acumulado | currency:'CLP ':'symbol':'1.0-0' }}</p>
           </ion-label>
         </ion-item>
+
+        <!-- Opciones al deslizar: editar o archivar -->
         <ion-item-options side="end">
           <ion-item-option (click)="openModal(trabajador)">
             <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
@@ -52,6 +67,7 @@
     </ion-list>
   </ng-container>
 
+  <!-- Skeleton loader mientras se carga la lista -->
   <ng-template #loading>
     <ion-list>
       <ion-item *ngFor="let i of [1,2,3]">
@@ -62,6 +78,7 @@
     </ion-list>
   </ng-template>
 
+  <!-- Botón flotante para abrir modal de creación de trabajador -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
     <ion-fab-button>
       <ion-icon name="add"></ion-icon>

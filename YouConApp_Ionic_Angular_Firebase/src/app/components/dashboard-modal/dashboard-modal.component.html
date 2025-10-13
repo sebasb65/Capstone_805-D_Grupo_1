@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Resumen General</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        <ion-card class="stat-card success">
+          <ion-card-content>
+            <ion-label>Total Ingresos</ion-label>
+            <h2>{{ (totalIngresos$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="6">
+        <ion-card class="stat-card danger">
+          <ion-card-content>
+            <ion-label>Total Gastos</ion-label>
+            <h2>{{ (totalGastos$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="6">
+        <ion-card class="stat-card danger">
+          <ion-card-content>
+            <ion-label>Mano de Obra</ion-label>
+            <h2>{{ (costoManoDeObra$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12">
+        <ion-card class="stat-card balance" [ngClass]="{'positive': (balanceGeneral$ | async)! >= 0, 'negative': (balanceGeneral$ | async)! < 0}">
+          <ion-card-content>
+            <ion-label>Balance General</ion-label>
+            <h2>{{ (balanceGeneral$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

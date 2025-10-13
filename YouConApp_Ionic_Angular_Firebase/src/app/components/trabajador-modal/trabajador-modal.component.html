@@ -1,0 +1,23 @@
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>{{ isEditMode ? 'Editar' : 'Nuevo' }} Trabajador</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="dismiss()">Cerrar</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="ion-padding">
+    <form [formGroup]="trabajadorForm" (ngSubmit)="submitForm()">
+      <ion-list>
+        <ion-item>
+          <ion-input label="Nombre" labelPlacement="floating" formControlName="nombre" required></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Apellido" labelPlacement="floating" formControlName="apellido" required></ion-input>
+        </ion-item>
+      </ion-list>
+      <ion-button type="submit" expand="block" [disabled]="trabajadorForm.invalid" class="ion-margin-top">
+        {{ isEditMode ? 'Actualizar Trabajador' : 'Guardar Trabajador' }}
+      </ion-button>
+    </form>
+  </ion-content>

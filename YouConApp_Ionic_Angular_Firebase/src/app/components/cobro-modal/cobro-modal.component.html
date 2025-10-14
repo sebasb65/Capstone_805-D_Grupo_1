@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Registrar Cobro a {{ comprador.nombre }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="cobroForm" (ngSubmit)="submitForm()">
+    <ion-list>
+      <ion-item>
+        <ion-input
+          label="Monto Cobrado"
+          labelPlacement="floating"
+          type="number"
+          formControlName="monto"
+          required>
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Fecha del Cobro"
+          labelPlacement="floating"
+          type="date"
+          formControlName="fecha"
+          required>
+        </ion-input>
+      </ion-item>
+    </ion-list>
+    <ion-button
+      type="submit"
+      expand="block"
+      class="ion-margin-top"
+      [disabled]="cobroForm.invalid">
+      Guardar Cobro
+    </ion-button>
+  </form>
+</ion-content>

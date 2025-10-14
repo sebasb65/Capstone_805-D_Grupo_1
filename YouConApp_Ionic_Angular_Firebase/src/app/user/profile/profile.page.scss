@@ -1,0 +1,36 @@
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 2rem;
+}
+
+ion-avatar {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1rem;
+}
+
+.profile-icon {
+  font-size: 120px;
+  color: var(--ion-color-primary);
+}
+
+.user-email {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.user-id {
+  font-size: 0.8rem;
+  color: var(--ion-color-secondary);
+  word-break: break-all;
+  padding: 0 1rem;
+  margin-top: 4px;
+}
+
+ion-list {
+    width: 100%;
+}

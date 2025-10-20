@@ -48,7 +48,6 @@ export class TaskHistoryPage implements OnInit {
   }
 
   ngOnInit() {
-    // CORRECCIÓN: Usamos startWith para emitir el valor inicial del formulario
     this.filterForm.valueChanges.pipe(
       startWith(this.filterForm.value)
     ).subscribe(formValue => {

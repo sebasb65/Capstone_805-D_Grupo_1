@@ -1,0 +1,64 @@
+// Encabezado de bienvenida
+.welcome-header {
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--ion-text-color);
+  }
+
+  p {
+    font-size: 1rem;
+    color: var(--ion-color-secondary);
+    margin: 0;
+  }
+}
+
+// Contenedor de la grilla
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+// Estilo mejorado para las tarjetas de navegación
+.nav-card {
+  margin: 0;
+  border-radius: 16px; // Bordes más redondeados
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+  // Efecto hover para interactividad
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  }
+  
+  ion-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    height: 130px;
+    
+    ion-icon {
+      font-size: 2.5rem; // Iconos ligeramente más pequeños
+      color: var(--ion-color-primary);
+      margin-bottom: 12px;
+    }
+    
+    ion-label {
+      font-weight: 600;
+      font-size: 0.9rem; // Texto un poco más pequeño para que encaje mejor
+      text-align: center;
+    }
+  }
+}
+
+// Estilo del menú de usuario
+ion-popover {
+  --width: 250px;
+}

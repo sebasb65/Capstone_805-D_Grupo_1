@@ -1,0 +1,7 @@
+{
+  "name": "YouConApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

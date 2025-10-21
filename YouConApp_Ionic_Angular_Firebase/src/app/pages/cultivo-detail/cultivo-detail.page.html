@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/pages/cultivos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ cultivo?.nombre || 'Detalle del Cultivo' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="report-page-content">
+  <ion-card class="filter-card">
+    <ion-card-content [formGroup]="filterForm">
+      <ion-row>
+          <ion-col size="6"><ion-input type="date" label="Desde" label-placement="floating" formControlName="fecha_inicio"></ion-input></ion-col>
+          <ion-col size="6"><ion-input type="date" label="Hasta" label-placement="floating" formControlName="fecha_fin"></ion-input></ion-col>
+      </ion-row>
+      <ion-button expand="block" fill="clear" (click)="limpiarFiltros()">Limpiar Filtros</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="ion-padding">
+    <ion-list-header>
+      <ion-label>Resumen del Periodo</ion-label>
+    </ion-list-header>
+
+    <ion-card class="summary-card">
+      <ion-card-content>
+          <ion-label>Costo Mano de Obra</ion-label>
+          <h2>{{ (costoTotal$ | async) | currency:'CLP' }}</h2>
+      </ion-card-content>
+    </ion-card>
+
+    <ng-container *ngIf="(produccionTotal$ | async) as produccion">
+      <div *ngIf="produccion.length > 0">
+        <ion-list-header>
+          <ion-label>Producción de Cosecha</ion-label>
+        </ion-list-header>
+        <ion-card *ngFor="let item of produccion" class="summary-card" style="margin-bottom: 8px;">
+          <ion-card-content style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
+            <ion-label style="font-weight: 600;">{{ item.calidad }}</ion-label>
+            <h2>{{ item.cantidad }} <span style="font-size: 0.8rem;">cajas</span></h2>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </ng-container>
+
+    <ion-list-header>
+      <ion-label>Tareas en este Cultivo</ion-label>
+    </ion-list-header>
+
+    <ng-container *ngIf="tareasFiltradas$ | async as tareas; else loading">
+        <div *ngIf="tareas.length === 0" class="empty-state">
+            <ion-icon name="file-tray-outline"></ion-icon>
+            <h2>Sin Tareas</h2>
+            <p>No hay tareas para este cultivo en el periodo seleccionado.</p>
+        </div>
+        </ng-container>
+  </div>
+
+  <ng-template #loading>
+      <ion-list>
+          <ion-item *ngFor="let i of [1,2,3]">
+              <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
+          </ion-item>
+      </ion-list>
+  </ng-template>
+</ion-content>

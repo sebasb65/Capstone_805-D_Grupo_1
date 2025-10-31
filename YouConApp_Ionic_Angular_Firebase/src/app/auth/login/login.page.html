@@ -1,28 +1,77 @@
+<!-- Contenedor principal de Ionic que ocupa toda la pantalla -->
 <ion-content [fullscreen]="true">
+  <!-- Contenedor flex para centrar el contenido verticalmente y horizontalmente -->
   <div class="center-container">
+    <!-- Tarjeta (card) que contiene el formulario de autenticación -->
     <div class="auth-card">
+      <!-- Encabezado de la tarjeta con el logo y nombre de la app -->
       <div class="auth-card-header">
+        <!-- Icono de hoja (leaf) como logo de la aplicación -->
         <ion-icon name="leaf-outline"></ion-icon>
+        <!-- Título de la aplicación -->
         <h1>YouConApp</h1>
       </div>
 
+      <!-- Formulario de inicio de sesión -->
+      <!-- (ngSubmit) ejecuta handleLogin() al enviar el formulario -->
+      <!-- #loginForm captura la referencia del formulario para validaciones -->
       <form (ngSubmit)="handleLogin()" #loginForm="ngForm">
+        
+        <!-- Campo de entrada para el correo electrónico -->
         <ion-item>
-          <ion-input label="Correo Electrónico" labelPlacement="floating" type="email" name="email" [(ngModel)]="credentials.email" required></ion-input>
+          <!-- Input con etiqueta flotante que se mueve al escribir -->
+          <!-- [(ngModel)] vincula el valor con credentials.email (two-way binding) -->
+          <!-- required: campo obligatorio para validación -->
+          <ion-input 
+            label="Correo Electrónico" 
+            labelPlacement="floating" 
+            type="email" 
+            name="email" 
+            [(ngModel)]="credentials.email" 
+            required>
+          </ion-input>
         </ion-item>
 
+        <!-- Campo de entrada para la contraseña -->
         <ion-item>
-          <ion-input label="Contraseña" labelPlacement="floating" type="password" name="password" [(ngModel)]="credentials.password" required></ion-input>
+          <!-- Input tipo password para ocultar los caracteres -->
+          <!-- [(ngModel)] vincula el valor con credentials.password -->
+          <ion-input 
+            label="Contraseña" 
+            labelPlacement="floating" 
+            type="password" 
+            name="password" 
+            [(ngModel)]="credentials.password" 
+            required>
+          </ion-input>
         </ion-item>
 
-        <ion-button type="submit" expand="block" class="ion-margin-top" [disabled]="!loginForm.valid">
+        <!-- Botón de envío del formulario -->
+        <!-- expand="block" hace que el botón ocupe todo el ancho -->
+        <!-- [disabled] desactiva el botón si el formulario no es válido -->
+        <ion-button 
+          type="submit" 
+          expand="block" 
+          class="ion-margin-top" 
+          [disabled]="!loginForm.valid">
           Ingresar
         </ion-button>
       </form>
 
+      <!-- Enlaces de navegación y recuperación -->
       <div class="auth-links">
-        <a href="#" (click)="$event.preventDefault(); handlePasswordReset()">¿Olvidaste tu contraseña?</a>
-        <a [routerLink]="['/auth/register']">Crear una cuenta</a>
+        <!-- Link para recuperar contraseña -->
+        <!-- $event.preventDefault() evita la navegación del enlace -->
+        <!-- handlePasswordReset() abre el diálogo de recuperación -->
+        <a href="#" (click)="$event.preventDefault(); handlePasswordReset()">
+          ¿Olvidaste tu contraseña?
+        </a>
+        
+        <!-- Link para navegar a la página de registro -->
+        <!-- [routerLink] navega a /auth/register sin recargar la página -->
+        <a [routerLink]="['/auth/register']">
+          Crear una cuenta
+        </a>
       </div>
     </div>
   </div>

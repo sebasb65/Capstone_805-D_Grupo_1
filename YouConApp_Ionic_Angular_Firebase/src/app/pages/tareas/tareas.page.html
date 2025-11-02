@@ -1,80 +1,193 @@
+<!-- Header de la página con toolbar -->
 <ion-header>
+  <!-- Toolbar con color primario (definido en el theme) -->
   <ion-toolbar color="primary">
+    <!-- Botones en el slot izquierdo (start) -->
     <ion-buttons slot="start">
+      <!-- Botón de retroceso que navega a /home si no hay historial -->
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
+    <!-- Título de la página -->
     <ion-title>Registrar Tarea</ion-title>
   </ion-toolbar>
 </ion-header>
 
+<!-- Contenido principal con padding interno -->
 <ion-content class="ion-padding">
+  <!-- Formulario reactivo vinculado a tareaForm -->
+  <!-- (ngSubmit) ejecuta guardarTarea() al enviar -->
   <form [formGroup]="tareaForm" (ngSubmit)="guardarTarea()">
+    <!-- Lista de Ionic para agrupar los campos del formulario -->
     <ion-list>
+      
+      <!-- Campo select para elegir trabajador -->
       <ion-item>
-        <ion-select label="Trabajador *" label-placement="stacked" formControlName="trabajador" interface="action-sheet" placeholder="Seleccionar trabajador">
+        <!-- Select vinculado al FormControl 'trabajador' -->
+        <!-- interface="action-sheet" muestra opciones en un sheet modal -->
+        <!-- * indica que el campo es obligatorio -->
+        <ion-select 
+          label="Trabajador *" 
+          label-placement="stacked" 
+          formControlName="trabajador" 
+          interface="action-sheet" 
+          placeholder="Seleccionar trabajador">
+          <!-- Itera sobre el observable trabajadores$ (usando async pipe) -->
+          <!-- Cada trabajador se muestra con su nombre y apellido -->
           <ion-select-option *ngFor="let trabajador of (trabajadores$ | async)" [value]="trabajador">
             {{ trabajador.nombre }} {{ trabajador.apellido }}
           </ion-select-option>
         </ion-select>
       </ion-item>
 
+      <!-- Campo de entrada para la fecha -->
       <ion-item>
-        <ion-input label="Fecha *" label-placement="stacked" type="date" formControlName="fecha"></ion-input>
+        <!-- Input tipo date vinculado al FormControl 'fecha' -->
+        <!-- label-placement="stacked" coloca la etiqueta arriba del campo -->
+        <ion-input 
+          label="Fecha *" 
+          label-placement="stacked" 
+          type="date" 
+          formControlName="fecha">
+        </ion-input>
       </ion-item>
 
+      <!-- Campo select para elegir tipo de tarea -->
       <ion-item>
-        <ion-select label="Tipo de Tarea *" label-placement="stacked" formControlName="tipo_tarea" interface="action-sheet" placeholder="Seleccionar tipo">
-          <ion-select-option *ngFor="let tipo of tiposDeTarea" [value]="tipo">{{ tipo }}</ion-select-option>
+        <!-- Select vinculado al FormControl 'tipo_tarea' -->
+        <!-- Los cambios en este campo activan la lógica en ngOnInit -->
+        <ion-select 
+          label="Tipo de Tarea *" 
+          label-placement="stacked" 
+          formControlName="tipo_tarea" 
+          interface="action-sheet" 
+          placeholder="Seleccionar tipo">
+          <!-- Itera sobre el array tiposDeTarea definido en el componente -->
+          <ion-select-option *ngFor="let tipo of tiposDeTarea" [value]="tipo">
+            {{ tipo }}
+          </ion-select-option>
         </ion-select>
       </ion-item>
 
+      <!-- Campo select para asignar cultivo (opcional) -->
       <ion-item>
-        <ion-select label="Asignar a Cultivo (Obligatorio)" label-placement="stacked" formControlName="cultivo" interface="action-sheet" placeholder="Seleccionar cultivo">
+        <!-- Select vinculado al FormControl 'cultivo' -->
+        <ion-select 
+          label="Asignar a Cultivo (Obligatorio)" 
+          label-placement="stacked" 
+          formControlName="cultivo" 
+          interface="action-sheet" 
+          placeholder="Seleccionar cultivo">
+          <!-- Opción "Ninguno" con valor null -->
           <ion-select-option [value]="null">Ninguno</ion-select-option>
+          <!-- Itera sobre el observable cultivos$ -->
           <ion-select-option *ngFor="let cultivo of (cultivos$ | async)" [value]="cultivo">
             {{ cultivo.nombre }}
           </ion-select-option>
         </ion-select>
       </ion-item>
 
+      <!-- Sección condicional: se muestra solo si NO es cosecha Y se ha seleccionado un tipo -->
+      <!-- Para tareas que no son cosecha (Poda, Siembra, Riego, etc.) -->
       <div *ngIf="!esCosecha && tareaForm.get('tipo_tarea')?.value" class="ion-padding-top">
+        <!-- Campo para ingresar el pago/jornal de la tarea -->
         <ion-item>
-          <ion-input label="Valor del Jornal/Pago" label-placement="stacked" type="number" formControlName="pago_simple"></ion-input>
+          <!-- Input numérico vinculado al FormControl 'pago_simple' -->
+          <ion-input 
+            label="Valor del Jornal/Pago" 
+            label-placement="stacked" 
+            type="number" 
+            formControlName="pago_simple">
+          </ion-input>
         </ion-item>
       </div>
 
+      <!-- Sección condicional: se muestra solo si la tarea es de tipo "Cosecha" -->
+      <!-- Permite registrar múltiples detalles de cosecha (calidad, cantidad, precio) -->
       <div *ngIf="esCosecha" class="cosecha-section">
+        <!-- FormArrayName conecta con el FormArray 'detalle_cosecha' -->
         <div formArrayName="detalle_cosecha">
+          <!-- Itera sobre cada FormGroup dentro del FormArray -->
+          <!-- 'i' es el índice usado como formGroupName -->
           <div *ngFor="let detalle of detallesCosechaForm.controls; let i = index" [formGroupName]="i">
+            
+            <!-- Divisor visual para separar cada detalle -->
             <ion-item-divider>
+              <!-- Etiqueta que muestra el número del detalle (i + 1 para empezar en 1) -->
               <ion-label>Detalle de Cosecha #{{ i + 1 }}</ion-label>
-              <ion-button fill="clear" color="danger" (click)="removeDetalleCosecha(i)" slot="end" *ngIf="detallesCosechaForm.controls.length > 1">
+              <!-- Botón para eliminar este detalle -->
+              <!-- Solo se muestra si hay más de un detalle (para no dejar el array vacío) -->
+              <ion-button 
+                fill="clear" 
+                color="danger" 
+                (click)="removeDetalleCosecha(i)" 
+                slot="end" 
+                *ngIf="detallesCosechaForm.controls.length > 1">
                 <ion-icon name="trash-outline"></ion-icon>
               </ion-button>
             </ion-item-divider>
+            
+            <!-- Select para elegir la calidad de la cosecha -->
             <ion-item>
-              <ion-select label="Calidad" label-placement="stacked" formControlName="calidad" interface="action-sheet">
+              <!-- FormControlName se conecta al control 'calidad' dentro del FormGroup[i] -->
+              <ion-select 
+                label="Calidad" 
+                label-placement="stacked" 
+                formControlName="calidad" 
+                interface="action-sheet">
+                <!-- Itera sobre calidadesCosecha: ['Primera', 'Segunda', 'Revuelta'] -->
                 <ion-select-option *ngFor="let calidad of calidadesCosecha" [value]="calidad">
                   {{ calidad }}
                 </ion-select-option>
               </ion-select>
             </ion-item>
+            
+            <!-- Input para cantidad de cajas cosechadas -->
             <ion-item>
-              <ion-input label="Cantidad (cajas)" label-placement="stacked" type="number" formControlName="cantidad" placeholder="Ej: 50"></ion-input>
+              <!-- FormControlName se conecta al control 'cantidad' dentro del FormGroup[i] -->
+              <ion-input 
+                label="Cantidad (cajas)" 
+                label-placement="stacked" 
+                type="number" 
+                formControlName="cantidad" 
+                placeholder="Ej: 50">
+              </ion-input>
             </ion-item>
+            
+            <!-- Input para precio por caja -->
             <ion-item>
-              <ion-input label="Precio por Caja" label-placement="stacked" type="number" formControlName="precio" placeholder="Ej: 1200"></ion-input>
+              <!-- FormControlName se conecta al control 'precio' dentro del FormGroup[i] -->
+              <ion-input 
+                label="Precio por Caja" 
+                label-placement="stacked" 
+                type="number" 
+                formControlName="precio" 
+                placeholder="Ej: 1200">
+              </ion-input>
             </ion-item>
           </div>
         </div>
-        <ion-button fill="outline" expand="block" (click)="addDetalleCosecha()" class="ion-margin-top">
+        
+        <!-- Botón para añadir un nuevo detalle de cosecha al FormArray -->
+        <!-- Útil cuando se cosechan múltiples calidades en una misma tarea -->
+        <ion-button 
+          fill="outline" 
+          expand="block" 
+          (click)="addDetalleCosecha()" 
+          class="ion-margin-top">
           <ion-icon name="add-circle-outline" slot="start"></ion-icon>
           Añadir Otro Tipo de Cosecha
         </ion-button>
       </div>
-      </ion-list>
+    </ion-list>
 
-    <ion-button type="submit" expand="block" class="ion-margin-top" [disabled]="tareaForm.invalid">
+    <!-- Botón de envío del formulario -->
+    <!-- type="submit" hace que dispare el evento (ngSubmit) -->
+    <!-- [disabled] desactiva el botón si el formulario es inválido -->
+    <ion-button 
+      type="submit" 
+      expand="block" 
+      class="ion-margin-top" 
+      [disabled]="tareaForm.invalid">
       Guardar Tarea
     </ion-button>
   </form>

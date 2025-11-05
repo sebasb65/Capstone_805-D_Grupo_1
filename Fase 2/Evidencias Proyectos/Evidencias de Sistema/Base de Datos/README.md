@@ -1,3 +1,7 @@
+# Evidencias de Base de Datos — YouConApp (REAL)
+
+**Ubicación sugerida en repo:** `/Fase 2/Evidencias Proyectos/Base de datos/`
+
 ## Contenido
 - `schema.md` — Modelo real de colecciones y campos (extraído del código).
 - `rules/firestore.rules` — Reglas basadas en `id_agricultor`.

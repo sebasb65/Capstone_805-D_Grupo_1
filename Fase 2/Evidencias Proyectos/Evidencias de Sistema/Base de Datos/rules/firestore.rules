@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    // Validador genérico por dueño (id_agricultor)
+    function isOwnerCreate() {
+      return signedIn() && request.resource.data.id_agricultor == request.auth.uid;
+    }
+    function isOwner() {
+      return signedIn() && resource.data.id_agricultor == request.auth.uid;
+    }
+
+    // Colecciones con id_agricultor
+    match /trabajadores/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+    match /compradores/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+    match /cultivos/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+    match /gastos/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+    match /ventas/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+    match /tareas/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+    match /pagos/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+    match /cobros/{id} {
+      allow read: if isOwner();
+      allow create: if isOwnerCreate();
+      allow update, delete: if isOwner();
+    }
+  }
+}

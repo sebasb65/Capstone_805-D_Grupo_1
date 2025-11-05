@@ -1,0 +1,109 @@
+{
+  "trabajadores": [
+    {
+      "id": "t_1",
+      "nombre": "Juan",
+      "apellido": "Pérez",
+      "saldo_acumulado": 0,
+      "id_agricultor": "u_demo",
+      "estado": "activo"
+    },
+    {
+      "id": "t_2",
+      "nombre": "María",
+      "apellido": "González",
+      "saldo_acumulado": 15000,
+      "id_agricultor": "u_demo",
+      "estado": "activo"
+    }
+  ],
+  "compradores": [
+    {
+      "id": "c_1",
+      "nombre": "Verdulería Central",
+      "saldo_deudor": 0,
+      "id_agricultor": "u_demo",
+      "estado": "activo"
+    }
+  ],
+  "cultivos": [
+    {
+      "id": "cu_1",
+      "nombre": "Lechuga",
+      "descripcion": "Temporada verano",
+      "superficie": 2.0,
+      "id_agricultor": "u_demo",
+      "estado": "activo"
+    }
+  ],
+  "gastos": [
+    {
+      "id": "g_1",
+      "categoria": "Insumos",
+      "descripcion": "Compra semillas",
+      "monto": 3000,
+      "fecha": "2025-11-05",
+      "id_agricultor": "u_demo"
+    },
+    {
+      "id": "g_2",
+      "categoria": "Mano_obra",
+      "descripcion": "Siembra lote A",
+      "monto": 35000,
+      "fecha": "2025-11-05",
+      "id_agricultor": "u_demo"
+    }
+  ],
+  "ventas": [
+    {
+      "id": "v_1",
+      "id_comprador": "c_1",
+      "nombre_comprador": "Verdulería Central",
+      "fecha": "2025-11-05",
+      "items": [
+        {
+          "producto": "Lechuga",
+          "cantidad": 30,
+          "unidad": "unid",
+          "precioUnitario": 1500
+        }
+      ],
+      "total_venta": 45000,
+      "id_agricultor": "u_demo"
+    }
+  ],
+  "tareas": [
+    {
+      "id": "ta_1",
+      "id_trabajador": "t_1",
+      "nombre_trabajador": "Juan Pérez",
+      "nombre_tarea": "Siembra",
+      "fecha": "2025-11-05",
+      "horas": 8,
+      "costo_hh": 5000,
+      "id_agricultor": "u_demo",
+      "id_cultivo": "cu_1",
+      "nombre_cultivo": "Lechuga"
+    }
+  ],
+  "pagos": [
+    {
+      "id": "p_1",
+      "id_trabajador": "t_2",
+      "nombre_trabajador": "María González",
+      "monto": 15000,
+      "fecha": "2025-11-05",
+      "id_agricultor": "u_demo"
+    }
+  ],
+  "cobros": [
+    {
+      "id": "co_1",
+      "id_comprador": "c_1",
+      "nombre_comprador": "Verdulería Central",
+      "monto": 20000,
+      "fecha": "2025-11-05",
+      "id_agricultor": "u_demo"
+    }
+  ]
+}

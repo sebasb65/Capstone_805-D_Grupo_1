@@ -107,8 +107,3 @@ export class GastosPage {
 }
 
 
-  async presentToast(message: string, color: 'success' | 'danger') {
-    const toast = await this.toastCtrl.create({ message, duration: 2000, color, position: 'top' });
-    await toast.present();
-  }
-}

@@ -1,0 +1,77 @@
+<!-- Contenedor principal de Ionic que ocupa toda la pantalla -->
+<ion-content [fullscreen]="true">
+  <!-- Contenedor flex para centrar el contenido verticalmente y horizontalmente -->
+  <div class="center-container">
+    <!-- Tarjeta (card) que contiene el formulario de registro -->
+    <div class="auth-card">
+      <!-- Encabezado de la tarjeta con icono y título -->
+      <div class="auth-card-header">
+        <!-- Icono de persona con signo más para representar "crear usuario" -->
+        <ion-icon name="person-add-outline"></ion-icon>
+        <!-- Título de la página de registro -->
+        <h1>Crear Cuenta</h1>
+      </div>
+
+      <!-- Formulario de registro de nuevo usuario -->
+      <!-- (ngSubmit) ejecuta handleRegister() al enviar el formulario -->
+      <!-- #registerForm captura la referencia del formulario para validaciones -->
+      <form (ngSubmit)="handleRegister()" #registerForm="ngForm">
+        
+        <!-- Campo de entrada para el correo electrónico -->
+        <ion-item>
+          <!-- Input con etiqueta flotante que se mueve al escribir -->
+          <!-- [(ngModel)] vincula el valor con credentials.email (two-way binding) -->
+          <!-- required: campo obligatorio para la validación del formulario -->
+          <!-- type="email": valida formato de correo electrónico -->
+          <ion-input 
+            label="Correo Electrónico" 
+            labelPlacement="floating" 
+            type="email" 
+            name="email" 
+            [(ngModel)]="credentials.email" 
+            required>
+          </ion-input>
+        </ion-item>
+
+        <!-- Campo de entrada para la contraseña -->
+        <ion-item>
+          <!-- Input tipo password para ocultar los caracteres ingresados -->
+          <!-- [(ngModel)] vincula el valor con credentials.password -->
+          <!-- required: campo obligatorio para la validación -->
+          <ion-input 
+            label="Contraseña" 
+            labelPlacement="floating" 
+            type="password" 
+            name="password" 
+            [(ngModel)]="credentials.password" 
+            required>
+          </ion-input>
+        </ion-item>
+
+        <!-- Botón de envío del formulario -->
+        <!-- type="submit" indica que este botón envía el formulario -->
+        <!-- expand="block" hace que el botón ocupe todo el ancho disponible -->
+        <!-- class="ion-margin-top" añade margen superior -->
+        <!-- [disabled] desactiva el botón si el formulario no cumple las validaciones -->
+        <ion-button 
+          type="submit" 
+          expand="block" 
+          class="ion-margin-top" 
+          [disabled]="!registerForm.valid">
+          Crear Cuenta
+        </ion-button>
+      </form>
+
+      <!-- Contenedor de enlaces de navegación -->
+      <!-- style inline para centrar el contenido (justify-content: center) -->
+      <div class="auth-links" style="justify-content: center;">
+        <!-- Link para navegar de vuelta a la página de login -->
+        <!-- [routerLink] permite navegación sin recargar la página (SPA) -->
+        <!-- Útil para usuarios que ya tienen cuenta -->
+        <a [routerLink]="['/auth/login']">
+          ¿Ya tienes una cuenta?
+        </a>
+      </div>
+    </div>
+  </div>
+</ion-content>

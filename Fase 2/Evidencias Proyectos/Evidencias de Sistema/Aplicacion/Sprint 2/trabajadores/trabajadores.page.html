@@ -1,0 +1,139 @@
+<!-- Header de la página con múltiples toolbars -->
+<ion-header>
+  <!-- Toolbar principal con color primario -->
+  <ion-toolbar color="primary">
+    <!-- Botones en el slot izquierdo (start) -->
+    <ion-buttons slot="start">
+      <!-- Botón de retroceso que navega a /home si no hay historial -->
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <!-- Título de la página -->
+    <ion-title>Trabajadores</ion-title>
+  </ion-toolbar>
+  
+  <!-- Segundo toolbar: Barra de búsqueda -->
+  <ion-toolbar>
+    <!-- Searchbar para filtrado en tiempo real -->
+    <!-- (ionInput) emite cada vez que el usuario escribe -->
+    <!-- handleSearch() actualiza el BehaviorSubject searchTerm$ -->
+    <ion-searchbar 
+      placeholder="Buscar por nombre o apellido"
+      (ionInput)="handleSearch($event)">
+    </ion-searchbar>
+  </ion-toolbar>
+  
+  <!-- Tercer toolbar: Selector de ordenamiento -->
+  <ion-toolbar>
+    <!-- Item sin líneas divisorias para diseño limpio -->
+    <ion-item lines="none">
+      <!-- Select para cambiar el criterio de ordenamiento -->
+      <!-- interface="popover" muestra opciones en un popover -->
+      <!-- (ionChange) emite cuando el usuario cambia la selección -->
+      <!-- value="nombre" establece "Nombre (A-Z)" como valor por defecto -->
+      <ion-select 
+        label="Ordenar por" 
+        interface="popover" 
+        (ionChange)="handleSort($event)" 
+        value="nombre">
+        <!-- Ordenar alfabéticamente por nombre -->
+        <ion-select-option value="nombre">Nombre (A-Z)</ion-select-option>
+        <!-- Ordenar alfabéticamente por apellido -->
+        <ion-select-option value="apellido">Apellido (A-Z)</ion-select-option>
+        <!-- Ordenar por saldo de mayor a menor -->
+        <ion-select-option value="saldo_acumulado">Mayor Saldo</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-toolbar>
+</ion-header>
+  
+<!-- Contenido principal con padding y clase personalizada -->
+<ion-content class="ion-padding list-page-content">
+  <!-- ng-container no renderiza elemento en el DOM, solo agrupa lógica -->
+  <!-- *ngIf con async pipe: se suscribe al observable trabajadores$ -->
+  <!-- 'as trabajadores' captura el valor emitido en una variable local -->
+  <!-- 'else loading' muestra el template #loading mientras carga -->
+  <ng-container *ngIf="trabajadores$ | async as trabajadores; else loading">
+    
+    <!-- Estado vacío: se muestra cuando no hay trabajadores -->
+    <div *ngIf="trabajadores.length === 0" class="empty-state">
+      <!-- Icono grande para estado vacío -->
+      <ion-icon name="people-circle-outline"></ion-icon>
+      <!-- Título del estado vacío -->
+      <h2>Sin Trabajadores</h2>
+      <!-- Mensaje de instrucción -->
+      <p>Añade un trabajador con el botón '+'.</p>
+    </div>
+
+    <!-- Lista de trabajadores: se muestra solo si hay trabajadores -->
+    <ion-list *ngIf="trabajadores.length > 0">
+      <!-- ion-item-sliding permite deslizar para mostrar opciones -->
+      <!-- *ngFor itera sobre cada trabajador del array filtrado/ordenado -->
+      <ion-item-sliding *ngFor="let trabajador of trabajadores">
+        
+        <!-- Item principal que muestra la información del trabajador -->
+        <ion-item>
+          <!-- Icono de persona en el slot izquierdo (start) -->
+          <ion-icon name="person" slot="start" color="primary"></ion-icon>
+          
+          <!-- Label con información del trabajador -->
+          <ion-label>
+            <!-- h2: Nombre completo del trabajador -->
+            <h2>{{ trabajador.nombre }} {{ trabajador.apellido }}</h2>
+            <!-- p: Saldo acumulado formateado como moneda chilena -->
+            <!-- currency:'CLP ':'symbol':'1.0-0' -->
+            <!--   - 'CLP ': Código de moneda chilena con espacio -->
+            <!--   - 'symbol': Muestra símbolo $ -->
+            <!--   - '1.0-0': Al menos 1 dígito entero, sin decimales -->
+            <p>Saldo: {{ trabajador.saldo_acumulado | currency:'CLP ':'symbol':'1.0-0' }}</p>
+          </ion-label>
+        </ion-item>
+        
+        <!-- Opciones que aparecen al deslizar el item hacia la izquierda -->
+        <!-- side="end" coloca las opciones en el lado derecho -->
+        <ion-item-options side="end">
+          <!-- Opción para editar trabajador -->
+          <!-- (click) abre el modal con los datos del trabajador -->
+          <ion-item-option (click)="openModal(trabajador)">
+            <!-- Icono de lápiz (editar) -->
+            <!-- slot="icon-only" muestra solo el icono sin texto -->
+            <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+          
+          <!-- Opción para archivar trabajador -->
+          <!-- color="danger" muestra el botón en rojo (acción destructiva) -->
+          <!-- (click) muestra alerta de confirmación antes de archivar -->
+          <ion-item-option color="danger" (click)="confirmArchive(trabajador)">
+            <!-- Icono de archivo (archivar) -->
+            <ion-icon name="archive-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  </ng-container>
+
+  <!-- Template de carga: se muestra mientras trabajadores$ está cargando -->
+  <!-- #loading define el nombre del template para referenciarlo en 'else' -->
+  <ng-template #loading>
+    <!-- Lista con skeleton screens (placeholders animados) -->
+    <ion-list>
+      <!-- Crea 3 items de placeholder -->
+      <!-- *ngFor itera sobre [1,2,3] para repetir 3 veces -->
+      <ion-item *ngFor="let i of [1,2,3]">
+        <ion-label>
+          <!-- ion-skeleton-text muestra una línea gris animada -->
+          <!-- animated añade efecto de "shimmer" (brillo que se mueve) -->
+          <!-- style="width: 80%" hace que ocupe el 80% del ancho -->
+          <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-template>
+</ion-content>
+
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
+    <ion-fab-button>
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+

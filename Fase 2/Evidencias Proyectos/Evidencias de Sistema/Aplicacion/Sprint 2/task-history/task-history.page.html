@@ -1,0 +1,200 @@
+<!-- Header de la página -->
+<ion-header>
+  <!-- Toolbar con color primario -->
+  <ion-toolbar color="primary">
+    <!-- Botones en el slot izquierdo (start) -->
+    <ion-buttons slot="start">
+      <!-- Botón de retroceso que navega a /home si no hay historial -->
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <!-- Título de la página -->
+    <ion-title>Historial de Tareas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Contenido principal con clase personalizada -->
+<ion-content class="report-page-content">
+  
+  <!-- Card de filtros: contiene todos los controles de filtrado -->
+  <ion-card class="filter-card">
+    <ion-card-content [formGroup]="filterForm">
+      
+      <!-- Fila con dos columnas para los filtros de fecha -->
+      <ion-row>
+        <!-- Columna izquierda: fecha de inicio (50% del ancho) -->
+        <ion-col size="6">
+          <!-- Input de fecha vinculado al FormControl 'fecha_inicio' -->
+          <!-- label-placement="floating" hace que la etiqueta flote al escribir -->
+          <ion-input 
+            type="date" 
+            label="Desde" 
+            label-placement="floating" 
+            formControlName="fecha_inicio">
+          </ion-input>
+        </ion-col>
+        
+        <!-- Columna derecha: fecha de fin (50% del ancho) -->
+        <ion-col size="6">
+          <!-- Input de fecha vinculado al FormControl 'fecha_fin' -->
+          <ion-input 
+            type="date" 
+            label="Hasta" 
+            label-placement="floating" 
+            formControlName="fecha_fin">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+      
+      <!-- Select para filtrar por trabajador -->
+      <ion-item>
+        <!-- Select vinculado al FormControl 'id_trabajador' -->
+        <!-- interface="action-sheet" muestra opciones en un sheet modal -->
+        <ion-select 
+          label="Filtrar por Trabajador" 
+          formControlName="id_trabajador" 
+          interface="action-sheet">
+          <!-- Opción "Todos" con valor null (sin filtro de trabajador) -->
+          <ion-select-option [value]="null">Todos</ion-select-option>
+          <!-- Itera sobre el observable trabajadores$ y muestra cada trabajador -->
+          <ion-select-option *ngFor="let t of (trabajadores$ | async)" [value]="t.id">
+            {{ t.nombre }} {{t.apellido}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <!-- Select para filtrar por cultivo -->
+      <ion-item>
+        <!-- Select vinculado al FormControl 'id_cultivo' -->
+        <ion-select 
+          label="Filtrar por Cultivo" 
+          formControlName="id_cultivo" 
+          interface="action-sheet">
+          <!-- Opción "Todos" con valor null (sin filtro de cultivo) -->
+          <ion-select-option [value]="null">Todos</ion-select-option>
+          <!-- Itera sobre el observable cultivos$ y muestra cada cultivo -->
+          <ion-select-option *ngFor="let c of (cultivos$ | async)" [value]="c.id">
+            {{ c.nombre }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <!-- Botón para limpiar todos los filtros -->
+      <!-- expand="block" hace que ocupe todo el ancho -->
+      <!-- fill="clear" estilo de botón transparente -->
+      <ion-button expand="block" fill="clear" (click)="limpiarFiltros()">
+        Limpiar Filtros
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Contenedor con padding para la sección de resultados -->
+  <div class="ion-padding">
+    
+    <!-- Encabezado de la sección de resultados -->
+    <ion-list-header>
+      <ion-label>Resultados</ion-label>
+    </ion-list-header>
+    
+    <!-- Card de resumen: muestra el costo total de las tareas filtradas -->
+    <ion-card class="summary-card">
+      <ion-card-content>
+        <!-- Etiqueta descriptiva -->
+        <ion-label>Costo Total de Tareas</ion-label>
+        <!-- Monto total calculado reactivamente -->
+        <!-- totalCostos$ se recalcula automáticamente cuando cambian las tareas filtradas -->
+        <!-- currency:'CLP ':'symbol':'1.0-0' formatea como moneda chilena sin decimales -->
+        <h2>{{ (totalCostos$ | async) | currency:'CLP ':'symbol':'1.0-0' }}</h2>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- ng-container no renderiza elemento en el DOM, solo agrupa lógica -->
+    <!-- *ngIf con async pipe: se suscribe al observable tareasFiltradas$ -->
+    <!-- 'as tareas' captura el valor emitido en una variable local -->
+    <!-- 'else loading' muestra el template #loading mientras carga -->
+    <ng-container *ngIf="tareasFiltradas$ | async as tareas; else loading">
+      
+      <!-- Estado vacío: se muestra cuando no hay tareas que coincidan con los filtros -->
+      <div *ngIf="tareas.length === 0" class="empty-state">
+        <!-- Icono de bandeja vacía -->
+        <ion-icon name="file-tray-outline"></ion-icon>
+        <!-- Título del estado vacío -->
+        <h2>Sin Tareas</h2>
+        <!-- Mensaje explicativo -->
+        <p>No se encontraron tareas con los filtros seleccionados.</p>
+      </div>
+      
+      <!-- Lista de tareas: se muestra solo si hay resultados -->
+      <ion-list *ngIf="tareas.length > 0" class="list-page-content">
+        <!-- ion-item-sliding permite deslizar para mostrar opciones -->
+        <!-- *ngFor itera sobre cada tarea del array filtrado -->
+        <ion-item-sliding *ngFor="let tarea of tareas">
+          
+          <!-- Item principal que muestra la información de la tarea -->
+          <ion-item>
+            <!-- Icono de documento en el slot izquierdo (start) -->
+            <ion-icon name="document-text-outline" slot="start" color="secondary"></ion-icon>
+            
+            <!-- Label con información detallada de la tarea -->
+            <ion-label>
+              <!-- h2: Tipo de tarea (Cosecha, Poda, Siembra, etc.) -->
+              <h2>{{ tarea.tipo_tarea }}</h2>
+              <!-- Etiqueta "Trabajador" en negrita -->
+              <p><strong>Trabajador:</strong></p>
+              <!-- Nombre completo del trabajador -->
+              <p>{{ tarea.nombre_trabajador }}</p>
+              <!-- Cultivo asociado (solo se muestra si existe) -->
+              <!-- *ngIf="tarea.nombre_cultivo" oculta esta línea si no hay cultivo -->
+              <p *ngIf="tarea.nombre_cultivo">
+                <strong>Cultivo:</strong> {{ tarea.nombre_cultivo }}
+              </p>
+            </ion-label>
+            
+            <!-- Slot derecho (end): información de pago y fecha -->
+            <!-- style inline para alinear texto a la derecha -->
+            <div slot="end" style="text-align: right;">
+              <!-- Pago calculado de la tarea en negrita y color primario -->
+              <!-- currency:'CLP ':'symbol':'1.0-0' formatea como moneda chilena sin decimales -->
+              <span style="font-weight: bold; color: var(--ion-color-primary);">
+                {{ tarea.pago_calculado | currency:'CLP ':'symbol':'1.0-0' }}
+              </span><br>
+              <!-- Fecha de la tarea en formato dd/MM/yyyy -->
+              <!-- date:'dd/MM/yyyy' transforma la fecha al formato día/mes/año -->
+              <!-- color medium (gris) y tamaño reducido para jerarquía visual -->
+              <span style="font-size: 0.8rem; color: var(--ion-color-medium);">
+                {{ tarea.fecha | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </ion-item>
+          
+          <!-- Opciones que aparecen al deslizar el item hacia la izquierda -->
+          <ion-item-options side="end">
+            <!-- Opción para eliminar tarea -->
+            <!-- color="danger" muestra el botón en rojo (acción destructiva) -->
+            <!-- (click) muestra alerta de confirmación antes de eliminar -->
+            <ion-item-option color="danger" (click)="confirmDelete(tarea)">
+              <!-- Icono de papelera (eliminar) -->
+              <!-- slot="icon-only" muestra solo el icono sin texto -->
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </ng-container>
+
+    <!-- Template de carga: se muestra mientras tareasFiltradas$ está cargando -->
+    <!-- #loading define el nombre del template para referenciarlo en 'else' -->
+    <ng-template #loading>
+      <!-- Lista con skeleton screens (placeholders animados) -->
+      <ion-list>
+        <!-- Crea 3 items de placeholder -->
+        <!-- *ngFor itera sobre [1,2,3] para repetir 3 veces -->
+        <ion-item *ngFor="let i of [1,2,3]">
+          <!-- ion-skeleton-text muestra una línea gris animada -->
+          <!-- animated añade efecto de "shimmer" (brillo que se mueve) -->
+          <!-- style="width: 100%" hace que ocupe todo el ancho -->
+          <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
+        </ion-item>
+      </ion-list>
+    </ng-template>
+  </div>
+</ion-content>

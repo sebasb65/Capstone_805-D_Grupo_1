@@ -1,0 +1,91 @@
+<!-- Header de la página con toolbar principal -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <!-- Botón de retroceso en el slot inicio -->
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <!-- Título de la página -->
+    <ion-title>Compradores</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Contenido principal con padding y clase personalizada -->
+<ion-content class="ion-padding list-page-content">
+  <!-- ng-container para renderizar la lógica principal si compradores$ tiene datos -->
+  <ng-container *ngIf="compradores$ | async as compradores; else loading">
+    
+    <!-- Estado vacío: se muestra cuando no existe ningún comprador registrado -->
+    <div *ngIf="compradores.length === 0" style="text-align: center; margin-top: 50px;">
+      <ion-icon name="storefront-outline" style="font-size: 5rem;"></ion-icon>
+      <h2>Sin Compradores</h2>
+      <p>Añade tu primer comprador con el botón '+'.</p>
+    </div>
+    
+    <!-- Lista de compradores: solo se muestra si hay algún comprador registrado -->
+    <ion-list *ngIf="compradores.length > 0">
+      <!-- ion-item-sliding para cada comprador, permite acciones con swipe -->
+      <ion-item-sliding *ngFor="let comprador of compradores">
+        
+        <!-- Ítem principal con icono y datos del comprador -->
+        <ion-item>
+          <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h2>{{ comprador.nombre }}</h2>
+            <!-- saldo_deudor representa la deuda del comprador -->
+            <p>Deuda: {{ comprador.saldo_deudor | currency:'CLP ':'symbol':'1.0-0' }}</p>
+          </ion-label>
+        </ion-item>
+
+        <!-- Acciones al deslizar: editar y archivar (primera fila) -->
+        <ion-item-options side="end">
+          <!-- Abrir modal de edición -->
+          <ion-item-option (click)="openModal(comprador)">
+            <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+          <!-- Archivar comprador -->
+          <ion-item-option color="danger" (click)="confirmArchive(comprador)">
+            <ion-icon name="archive-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+
+        <!-- Acciones extra al deslizar (segunda fila): registrar cobro, editar y archivar -->
+        <ion-item-options side="end">
+          <!-- Abrir modal para registrar un pago/cobro -->
+          <ion-item-option color="success" (click)="openCobroModal(comprador)">
+            <ion-icon name="cash-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+          <!-- Abrir modal de edición nuevamente (acceso doble) -->
+          <ion-item-option (click)="openModal(comprador)">
+            <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+          <!-- Archivar comprador nuevamente -->
+          <ion-item-option color="danger" (click)="confirmArchive(comprador)">
+            <ion-icon name="archive-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  </ng-container>
+
+  <!-- Template de carga: muestra placeholders mientras compradores$ está cargando -->
+  <ng-template #loading>
+    <ion-list>
+      <ion-item *ngFor="let i of [1,2,3]">
+        <ion-label>
+          <!-- ion-skeleton-text para efecto de "cargando" -->
+          <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-template>
+
+  <!-- Botón flotante fijo para añadir un nuevo comprador -->
+  <!-- vertical="bottom" horizontal="end" lo posiciona abajo a la derecha -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="openModal()">
+    <ion-fab-button>
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>

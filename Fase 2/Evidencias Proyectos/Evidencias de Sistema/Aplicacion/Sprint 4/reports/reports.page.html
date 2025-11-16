@@ -1,0 +1,182 @@
+<!-- Header de la página con título y botón de regreso -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Reportes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Selector tipo de reporte: pagos, gastos o ingresos -->
+  <ion-card>
+    <ion-card-content>
+      <!-- Segmento para cambiar el tipo de reporte dinámicamente -->
+      <ion-segment [(ngModel)]="reportType">
+        <ion-segment-button value="pagos">
+          <ion-label>Pagos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="gastos">
+          <ion-label>Gastos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="ingresos">
+          <ion-label>Ingresos</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card de filtros por rango de fechas -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Filtros</ion-card-title>
+      <ion-card-subtitle>Selecciona un rango de fechas</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Formulario reactivo para ingresar fechas -->
+      <form [formGroup]="filterForm">
+        <ion-item>
+          <ion-label position="stacked">Fecha inicio</ion-label>
+          <ion-input
+            type="date"
+            formControlName="fecha_inicio">
+          </ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Fecha fin</ion-label>
+          <ion-input
+            type="date"
+            formControlName="fecha_fin">
+          </ion-input>
+        </ion-item>
+        <!-- Botón para generar PDF del reporte seleccionado -->
+        <div class="actions">
+          <ion-button expand="block" fill="outline" (click)="generatePdf()">
+            {{ reportType === 'pagos' ? 'Generar PDF de pagos'
+              : reportType === 'gastos' ? 'Generar PDF de gastos'
+              : 'Generar PDF de ingresos' }}
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- ================= PAGOS ================= -->
+  <ng-container *ngIf="reportType === 'pagos'">
+    <ng-container *ngIf="pagos$ | async as pagos">
+      <!-- Card con lista de pagos cuando hay datos -->
+      <ion-card *ngIf="pagos.length > 0; else noPagos">
+        <ion-card-header>
+          <ion-card-title>Pagos a Trabajadores</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <!-- Lista de pagos -->
+            <ion-item *ngFor="let p of pagos">
+              <ion-label>
+                <h2>{{ p.nombre_trabajador || 'Pago trabajador' }}</h2>
+                <p>Fecha: {{ p.fecha }}</p>
+              </ion-label>
+              <!-- Monto pagado alineado a la derecha -->
+              <ion-label slot="end" class="amount">
+                $ {{ p.monto | number:'1.0-0' }}
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <!-- Total pagado en el período -->
+          <div class="total-row" *ngIf="totalPagado$ | async as total">
+            <strong>Total pagado en el período:</strong>
+            <span>$ {{ total | number:'1.0-0' }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+    <!-- Mensaje si no existen pagos en el periodo -->
+    <ng-template #noPagos>
+      <ion-card>
+        <ion-card-content>
+          <p>No hay pagos en el rango seleccionado.</p>
+        </ion-card-content>
+      </ion-card>
+    </ng-template>
+  </ng-container>
+
+  <!-- ================= GASTOS ================= -->
+  <ng-container *ngIf="reportType === 'gastos'">
+    <ng-container *ngIf="gastos$ | async as gastos">
+      <!-- Card con lista de gastos cuando hay datos -->
+      <ion-card *ngIf="gastos.length > 0; else noGastos">
+        <ion-card-header>
+          <ion-card-title>Gastos</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <!-- Lista de gastos, muestra descripción y categoría -->
+            <ion-item *ngFor="let g of gastos">
+              <ion-label>
+                <h2>{{ g.descripcion || 'Gasto' }}</h2>
+                <p>Categoría: {{ g.categoria }} | Fecha: {{ g.fecha }}</p>
+              </ion-label>
+              <ion-label slot="end" class="amount">
+                $ {{ g.monto | number:'1.0-0' }}
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <!-- Total gastado en el período -->
+          <div class="total-row" *ngIf="totalGastos$ | async as totalG">
+            <strong>Total gastado en el período:</strong>
+            <span>$ {{ totalG | number:'1.0-0' }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+    <!-- Mensaje si no existen gastos en el periodo -->
+    <ng-template #noGastos>
+      <ion-card>
+        <ion-card-content>
+          <p>No hay gastos en el rango seleccionado.</p>
+        </ion-card-content>
+      </ion-card>
+    </ng-template>
+  </ng-container>
+
+  <!-- ================= INGRESOS ================= -->
+  <ng-container *ngIf="reportType === 'ingresos'">
+    <ng-container *ngIf="ingresos$ | async as ingresos">
+      <!-- Card con lista de ingresos cuando hay datos -->
+      <ion-card *ngIf="ingresos.length > 0; else noIngresos">
+        <ion-card-header>
+          <ion-card-title>Ingresos (Ventas)</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <!-- Lista de ingresos/ventas, muestra el comprador y la fecha -->
+            <ion-item *ngFor="let v of ingresos">
+              <ion-label>
+                <h2>{{ v.nombre_comprador || v.comprador || 'Venta' }}</h2>
+                <p>Fecha: {{ v.fecha }}</p>
+              </ion-label>
+              <ion-label slot="end" class="amount">
+                $ {{ (v.total_venta || v.monto) | number:'1.0-0' }}
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <!-- Total ingresado en el período -->
+          <div class="total-row" *ngIf="totalIngresos$ | async as totalI">
+            <strong>Total ingresado en el período:</strong>
+            <span>$ {{ totalI | number:'1.0-0' }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+    <!-- Mensaje si no existen ingresos en el periodo -->
+    <ng-template #noIngresos>
+      <ion-card>
+        <ion-card-content>
+          <p>No hay ingresos en el rango seleccionado.</p>
+        </ion-card-content>
+      </ion-card>
+    </ng-template>
+  </ng-container>
+</ion-content>

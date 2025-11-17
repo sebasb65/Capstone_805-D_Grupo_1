@@ -1,0 +1,122 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IonicModule, AlertController } from '@ionic/angular';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { DataService } from '../../services/data.service';
+
+@Component({
+  selector: 'app-supervisores',
+  templateUrl: './supervisores.page.html',
+  styleUrls: ['./supervisores.page.scss'],
+  standalone: true,
+  imports: [IonicModule, CommonModule, FormsModule, ReactiveFormsModule],
+})
+export class SupervisoresPage implements OnInit {
+
+  supervisores$!: Observable<any[]>;
+  form!: FormGroup;
+
+  private fb = inject(FormBuilder);
+  private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private alertCtrl = inject(AlertController);
+
+  constructor() {}
+
+  ngOnInit() {
+    this.form = this.fb.group({
+      nombre: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      telefono: ['']
+    });
+
+    // Obtenemos el usuario actual (admin) y cargamos sus supervisores
+    this.authService.user$.subscribe(user => {
+      if (user) {
+        this.supervisores$ = this.dataService.getSupervisoresByAdmin(user.uid);
+      }
+    });
+  }
+
+  async agregarSupervisor() {
+    if (this.form.invalid) {
+      const alert = await this.alertCtrl.create({
+        header: 'Formulario incompleto',
+        message: 'Debes ingresar al menos nombre y un correo válido.',
+        buttons: ['OK'],
+      });
+      await alert.present();
+      return;
+    }
+
+    const user = await this.getCurrentUser();
+    if (!user) {
+      const alert = await this.alertCtrl.create({
+        header: 'Sesión no válida',
+        message: 'Debes iniciar sesión nuevamente.',
+        buttons: ['OK'],
+      });
+      await alert.present();
+      return;
+    }
+
+    const { nombre, email, telefono } = this.form.value;
+
+    try {
+      await this.dataService.addSupervisor({
+        nombre,
+        email,
+        telefono: telefono || '',
+        adminUid: user.uid,
+      });
+
+      this.form.reset();
+
+      const alert = await this.alertCtrl.create({
+        header: 'Supervisor agregado',
+        message: 'El supervisor ha sido registrado correctamente. Luego podrá crear su cuenta usando ese correo.',
+        buttons: ['OK'],
+      });
+      await alert.present();
+
+    } catch (error) {
+      console.error(error);
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: 'Ocurrió un error al guardar el supervisor.',
+        buttons: ['OK'],
+      });
+      await alert.present();
+    }
+  }
+
+  async eliminarSupervisor(sup: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Eliminar supervisor',
+      message: `¿Seguro que deseas eliminar al supervisor "${sup.nombre}"?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => {
+            this.dataService.deleteSupervisor(sup.id);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private getCurrentUser(): Promise<any> {
+    return new Promise(resolve => {
+      const sub = this.authService.user$.subscribe(u => {
+        sub.unsubscribe();
+        resolve(u);
+      });
+    });
+  }
+}

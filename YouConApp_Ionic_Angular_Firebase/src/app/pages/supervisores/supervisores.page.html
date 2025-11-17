@@ -1,0 +1,79 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Supervisores</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Formulario para agregar supervisor -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Agregar supervisor</ion-card-title>
+      <ion-card-subtitle>El agricultor registra al supervisor y luego éste crea su cuenta con ese correo.</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form [formGroup]="form">
+
+        <ion-item>
+          <ion-label position="stacked">Nombre</ion-label>
+          <ion-input formControlName="nombre"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Correo electrónico</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Teléfono (opcional)</ion-label>
+          <ion-input type="tel" formControlName="telefono"></ion-input>
+        </ion-item>
+
+        <ion-button
+          expand="block"
+          class="ion-margin-top"
+          (click)="agregarSupervisor()">
+          Guardar supervisor
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de supervisores del agricultor -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Supervisores registrados</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ng-container *ngIf="supervisores$ | async as supervisores">
+        <ion-list *ngIf="supervisores.length > 0; else noSupervisores">
+          <ion-item *ngFor="let s of supervisores">
+            <ion-label>
+              <h2>{{ s.nombre }}</h2>
+              <p>{{ s.email }}</p>
+              <p *ngIf="s.telefono">📞 {{ s.telefono }}</p>
+            </ion-label>
+            <ion-button
+              fill="clear"
+              color="danger"
+              slot="end"
+              (click)="eliminarSupervisor(s)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+
+        <ng-template #noSupervisores>
+          <p>No hay supervisores registrados todavía.</p>
+        </ng-template>
+      </ng-container>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

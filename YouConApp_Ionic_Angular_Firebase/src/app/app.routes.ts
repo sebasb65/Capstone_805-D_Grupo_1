@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -23,12 +24,12 @@ export const routes: Routes = [
   {
     path: 'pages/trabajadores',
     loadComponent: () => import('./pages/trabajadores/trabajadores.page').then( m => m.TrabajadoresPage),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminGuard],
   },
   {
     path: 'pages/compradores',
     loadComponent: () => import('./pages/compradores/compradores.page').then( m => m.CompradoresPage),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'pages/cultivos',
@@ -43,7 +44,7 @@ export const routes: Routes = [
   {
     path: 'pages/gastos',
     loadComponent: () => import('./pages/gastos/gastos.page').then( m => m.GastosPage),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'pages/pagos',
@@ -53,7 +54,7 @@ export const routes: Routes = [
   {
     path: 'pages/ingresos',
     loadComponent: () => import('./pages/ingresos/ingresos.page').then( m => m.IngresosPage),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'pages/task-history',
@@ -75,8 +76,16 @@ export const routes: Routes = [
     loadComponent: () => import('./user/settings/settings.page').then( m => m.SettingsPage),
     canActivate: [AuthGuard]
   },
-  //{
-  //  path: 'pages/reports',
-  //  loadComponent: () => import('./pages/reports/reports.page').then( m => m.ReportsPage)
-  //},
+  {
+    path: 'pages/reports',
+    loadComponent: () => import('./pages/reports/reports.page').then( m => m.ReportsPage),
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'pages/supervisores',
+    loadComponent: () => import('./pages/supervisores/supervisores.page').then(m => m.SupervisoresPage),
+    canActivate: [AuthGuard, AdminGuard]
+  }
+
 ];
+

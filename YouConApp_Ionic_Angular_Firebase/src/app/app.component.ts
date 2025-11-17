@@ -10,7 +10,7 @@ import {
   personOutline, settingsOutline, statsChartOutline, peopleOutline, 
   storefrontOutline, documentTextOutline, trendingUpOutline, trendingDownOutline,
   cashOutline, timeOutline, businessOutline, leaf, receiptOutline, walletOutline,
-  fileTrayOutline, add, trashOutline, pencilOutline, archiveOutline, barChartOutline, 
+  fileTrayOutline, add, trashOutline, pencilOutline, archiveOutline, barChartOutline, albumsOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -64,7 +64,8 @@ export class AppComponent {
       trashOutline,
       pencilOutline,
       archiveOutline,
-      barChartOutline
+      barChartOutline,
+      albumsOutline
     });
   }
 }

@@ -2,16 +2,12 @@
   <ion-toolbar color="primary">
     <ion-title>Inicio</ion-title>
 
-    <ion-buttons slot="start">
+    <!--  Dashboard solo para ADMIN -->
+    <ion-buttons slot="start" *ngIf="role === 'admin'">
       <ion-button (click)="openDashboard()">
         <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-
-    <!-- <ion-button [routerLink]="['/pages/reports']">
-        <ion-icon name="bar-chart-outline" slot="icon-only"></ion-icon>
-    </ion-button>
-       -->
 
     <ion-buttons slot="end">
       <ion-button id="user-menu-trigger">
@@ -43,61 +39,88 @@
 </ion-popover>
 
 <ion-content class="ion-padding">
-  <div class="grid-container">
-    <ion-card class="nav-card" (click)="goTo('/pages/trabajadores')" button>
-      <ion-card-content>
-        <ion-icon name="people-outline"></ion-icon>
-        <ion-label>Trabajadores</ion-label>
-      </ion-card-content>
-    </ion-card>
 
-    <ion-card class="nav-card" (click)="goTo('/pages/compradores')" button>
-      <ion-card-content>
-        <ion-icon name="storefront-outline"></ion-icon>
-        <ion-label>Compradores</ion-label>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="nav-card" (click)="goTo('/pages/cultivos')" button>
+  <!-- Esperamos a tener el rol cargado -->
+  <div class="grid-container" *ngIf="role">
+    <!--  Operativo: cultivos (admin y standard) -->
+    <ion-card class="nav-card" (click)="goTo('/pages/cultivos')" button *ngIf="role === 'admin'">
       <ion-card-content>
         <ion-icon name="leaf-outline"></ion-icon>
         <ion-label>Mis Cultivos</ion-label>
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="nav-card" (click)="goTo('/pages/tareas')" button>
+     <!--  Admin: compradores (relación comercial) -->
+    <ion-card class="nav-card" (click)="goTo('/pages/compradores')" button *ngIf="role === 'admin'">
       <ion-card-content>
-        <ion-icon name="document-text-outline"></ion-icon>
+        <ion-icon name="storefront-outline"></ion-icon>
+        <ion-label>Compradores</ion-label>
+      </ion-card-content>
+    </ion-card>
+
+    <!--  Admin: gestión de trabajadores -->
+    <ion-card class="nav-card" (click)="goTo('/pages/trabajadores')" button *ngIf="role === 'admin'">
+      <ion-card-content>
+        <ion-icon name="people-outline"></ion-icon>
+        <ion-label>Trabajadores</ion-label>
+      </ion-card-content>
+    </ion-card>
+
+    <!--  Operativo: tareas (admin y standard) -->
+    <ion-card class="nav-card" (click)="goTo('/pages/tareas')" button *ngIf="role === 'admin' || role === 'standard'">
+      <ion-card-content>
+        <ion-icon name="albums-outline"></ion-icon>
+
         <ion-label>Tareas</ion-label>
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="nav-card" (click)="goTo('/pages/ingresos')" button>
+    <!--  Admin: ingresos (finanzas) -->
+    <ion-card class="nav-card" (click)="goTo('/pages/ingresos')" button *ngIf="role === 'admin'">
       <ion-card-content>
         <ion-icon name="trending-up-outline"></ion-icon>
         <ion-label>Ingresos</ion-label>
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="nav-card" (click)="goTo('/pages/gastos')" button>
+    <!--  Admin: gastos (finanzas) -->
+    <ion-card class="nav-card" (click)="goTo('/pages/gastos')" button *ngIf="role === 'admin'">
       <ion-card-content>
         <ion-icon name="trending-down-outline"></ion-icon>
         <ion-label>Gastos</ion-label>
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="nav-card" (click)="goTo('/pages/pagos')" button>
+    <!--  Operativo: pagos trabajadores (admin y standard) -->
+    <ion-card class="nav-card" (click)="goTo('/pages/pagos')" button *ngIf="role === 'admin'">
       <ion-card-content>
         <ion-icon name="cash-outline"></ion-icon>
         <ion-label>Pagos</ion-label>
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="nav-card" (click)="goTo('/pages/task-history')" button>
+    <!-- Operativo: historial tareas (admin y standard) -->
+    <ion-card class="nav-card" (click)="goTo('/pages/task-history')" button *ngIf="role === 'admin' || role === 'standard'">
       <ion-card-content>
         <ion-icon name="time-outline"></ion-icon>
         <ion-label>Historial</ion-label>
       </ion-card-content>
     </ion-card>
+    
+    <!-- Solo admin puede ver Reportes -->
+    <ion-card class="nav-card" (click)="goTo('/pages/reports')" button *ngIf="role === 'admin'">
+      <ion-card-content>
+        <ion-icon name="document-text-outline"></ion-icon>
+        <ion-label>Reportes</ion-label>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="nav-card" (click)="goTo('/pages/supervisores')" button *ngIf="role === 'admin'">
+      <ion-card-content>
+        <ion-icon name="person-outline"></ion-icon>
+        <ion-label>Supervisores</ion-label>
+      </ion-card-content>
+    </ion-card>
+
   </div>
 </ion-content>

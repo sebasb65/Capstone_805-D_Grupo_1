@@ -1,18 +1,12 @@
-// Importaciones de Angular, Ionic y formularios
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
-
-// Servicios propios para autenticación y acceso a datos
+// Servicios propios
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
 
-/**
- * Componente de página para gestión de supervisores (solo visible para admin).
- * Permite listar, registrar y eliminar supervisores asociados al admin actual.
- */
 @Component({
   selector: 'app-supervisores',
   templateUrl: './supervisores.page.html',
@@ -22,13 +16,9 @@ import { DataService } from '../../services/data.service';
 })
 export class SupervisoresPage implements OnInit {
 
-  // Observable que emite la lista de supervisores asociados al admin actual
   supervisores$!: Observable<any[]>;
-
-  // Formulario reactivo para registrar supervisores
   form!: FormGroup;
 
-  // Inyección de dependencias con Angular inject API
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
   private authService = inject(AuthService);
@@ -36,19 +26,20 @@ export class SupervisoresPage implements OnInit {
 
   constructor() {}
 
-  /**
-   * Hook de inicialización:
-   * - Inicializa el formulario de supervisor (nombre y email obligatorios)
-   * - Suscribe el observable user$ y obtiene los supervisores del admin autenticado
-   */
   ngOnInit() {
     this.form = this.fb.group({
-      nombre: ['', [Validators.required]],           // Nombre requerido
-      email: ['', [Validators.required, Validators.email]], // Email válido requerido
-      telefono: ['']                                 // Teléfono opcional
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      
+      // FIX: Validación estricta de email (debe tener @ y punto)
+      email: ['', [
+        Validators.required, 
+        Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')
+      ]],
+      
+      // FIX: Validación estricta de teléfono (Solo números y +)
+      telefono: ['', [Validators.pattern('^[0-9+]+$')]] 
     });
 
-    // Carga los supervisores de este admin apenas se reconoce el usuario
     this.authService.user$.subscribe(user => {
       if (user) {
         this.supervisores$ = this.dataService.getSupervisoresByAdmin(user.uid);
@@ -56,23 +47,18 @@ export class SupervisoresPage implements OnInit {
     });
   }
 
-  /**
-   * Agrega un nuevo supervisor validando primero el formulario.
-   * Da mensajes de alerta apropiados en caso de error o éxito.
-   */
   async agregarSupervisor() {
-    // Si el formulario no es válido, muestra alerta
+    // 1. Si el formulario es inválido (por regex de email o teléfono), mostramos alerta y paramos.
     if (this.form.invalid) {
       const alert = await this.alertCtrl.create({
-        header: 'Formulario incompleto',
-        message: 'Debes ingresar al menos nombre y un correo válido.',
+        header: 'Datos Incorrectos',
+        message: 'Por favor revisa:\n- El correo debe ser válido (ej: nombre@correo.com).\n- El teléfono solo puede contener números.',
         buttons: ['OK'],
       });
       await alert.present();
       return;
     }
 
-    // Verifica usuario autenticado antes de poder asociar al adminUid
     const user = await this.getCurrentUser();
     if (!user) {
       const alert = await this.alertCtrl.create({
@@ -84,31 +70,26 @@ export class SupervisoresPage implements OnInit {
       return;
     }
 
-    // Obtiene los valores del formulario
     const { nombre, email, telefono } = this.form.value;
 
     try {
-      // Llama al método del servicio para guardar el supervisor en Firestore
       await this.dataService.addSupervisor({
         nombre,
-        email,
+        email: email.toLowerCase().trim(), // Guardamos limpio
         telefono: telefono || '',
         adminUid: user.uid,
       });
 
-      // Limpia el formulario
       this.form.reset();
 
-      // Alerta de éxito
       const alert = await this.alertCtrl.create({
         header: 'Supervisor agregado',
-        message: 'El supervisor ha sido registrado correctamente. Luego podrá crear su cuenta usando ese correo.',
+        message: 'El supervisor ha sido registrado correctamente.',
         buttons: ['OK'],
       });
       await alert.present();
 
     } catch (error) {
-      // Si ocurre error durante la inserción
       console.error(error);
       const alert = await this.alertCtrl.create({
         header: 'Error',
@@ -119,11 +100,6 @@ export class SupervisoresPage implements OnInit {
     }
   }
 
-  /**
-   * Muestra alerta de confirmación antes de eliminar un supervisor.
-   * Si se confirma, llama al método del servicio para eliminarlo.
-   * @param sup - Supervisor a eliminar
-   */
   async eliminarSupervisor(sup: any) {
     const alert = await this.alertCtrl.create({
       header: 'Eliminar supervisor',
@@ -139,14 +115,9 @@ export class SupervisoresPage implements OnInit {
         }
       ]
     });
-
     await alert.present();
   }
 
-  /**
-   * Función utilitaria para obtener el usuario autenticado actual de manera "promise"
-   * Usada antes de asignar el adminUid al nuevo supervisor.
-   */
   private getCurrentUser(): Promise<any> {
     return new Promise(resolve => {
       const sub = this.authService.user$.subscribe(u => {

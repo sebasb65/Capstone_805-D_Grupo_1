@@ -1,4 +1,3 @@
-// Importaciones base de Angular y Firestore
 import { Injectable } from '@angular/core';
 import {
   Firestore,
@@ -14,15 +13,12 @@ import {
   orderBy,
   getDoc
 } from '@angular/fire/firestore';
-
-// RxJS para la reactividad
-import { Observable, of } from 'rxjs';
+// Importamos firstValueFrom para manejar promesas de Observables
+import { Observable, of, firstValueFrom } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
-
-// Servicio de autenticación para obtener el usuario actual (dueño de los registros)
 import { AuthService } from './auth.service';
 
-// ====== Interfaces para los diferentes tipos de datos ======
+// ====== Interfaces ======
 
 export interface Trabajador {
   id?: string;
@@ -53,6 +49,7 @@ export interface Pago {
   monto: number;
   fecha: string;
   id_agricultor: string;
+  createdAt?: any; // Importante para el ordenamiento exacto
 }
 
 export interface Cultivo {
@@ -107,7 +104,6 @@ export interface Cobro {
   id_agricultor: string;
 }
 
-// ====== Servicio principal para acceso y manipulación de datos Firestore ======
 @Injectable({
   providedIn: 'root'
 })
@@ -118,25 +114,26 @@ export class DataService {
     private authService: AuthService
   ) { }
 
-  // ==== Getter UID: obtiene el UID de la sesión autenticada ====
-  private get uid() {
-    const user = this.authService.auth.currentUser;
-    if (!user) throw new Error('Usuario no autenticado.');
-    return user.uid;
-  }
-
-  // ==== Observador UID dueño (del agricultor) según contexto de sesión o administración ====
-  private ownerUid$ = this.authService.appUser$.pipe(
+  // ==== LOGICA DE DUEÑO (MULTI-TENANCY) ====
+  
+  // Observable público que devuelve el ID del Agricultor (Jefe)
+  // Si soy Admin, devuelve mi ID. Si soy Supervisor, devuelve el ID de mi Jefe.
+  public ownerUid$ = this.authService.appUser$.pipe(
     map((appUser: any) => {
       if (!appUser) return null;
-      // Si el usuario es standard y depende de un admin, usa el UID del admin
       if (appUser.rol === 'standard' && appUser.adminUid) {
         return appUser.adminUid;
       }
-      // Si es admin, usa su propio UID
       return appUser.uid;
     })
   );
+
+  // Función auxiliar para obtener el ID del dueño al momento de guardar (Promesa)
+  private async getOwnerId(): Promise<string> {
+    const uid = await firstValueFrom(this.ownerUid$);
+    if (!uid) throw new Error('No se pudo identificar al dueño de la cuenta.');
+    return uid;
+  }
 
   // ==== CRUD de Trabajadores ====
   getTrabajadores = (): Observable<Trabajador[]> =>
@@ -155,13 +152,16 @@ export class DataService {
       )
     );
 
-  addTrabajador = (data: { nombre: string; apellido: string }) =>
-    addDoc(collection(this.firestore, 'trabajadores'), {
+  // Guardar a nombre del dueño
+  addTrabajador = async (data: { nombre: string; apellido: string }) => {
+    const ownerId = await this.getOwnerId();
+    return addDoc(collection(this.firestore, 'trabajadores'), {
       ...data,
       saldo_acumulado: 0,
-      id_agricultor: this.uid,
+      id_agricultor: ownerId,
       estado: 'activo'
     });
+  }
 
   updateTrabajador = (id: string, data: Partial<Trabajador>) =>
     updateDoc(doc(this.firestore, `trabajadores/${id}`), data);
@@ -186,13 +186,16 @@ export class DataService {
       )
     );
 
-  addComprador = (data: { nombre: string }) =>
-    addDoc(collection(this.firestore, 'compradores'), {
+  // Guardar a nombre del dueño
+  addComprador = async (data: { nombre: string }) => {
+    const ownerId = await this.getOwnerId();
+    return addDoc(collection(this.firestore, 'compradores'), {
       ...data,
       saldo_deudor: 0,
-      id_agricultor: this.uid,
+      id_agricultor: ownerId,
       estado: 'activo'
     });
+  }
 
   updateComprador = (id: string, data: Partial<Comprador>) =>
     updateDoc(doc(this.firestore, `compradores/${id}`), data);
@@ -217,12 +220,15 @@ export class DataService {
       )
     );
 
-  addCultivo = (data: Omit<Cultivo, 'id' | 'id_agricultor' | 'estado'>) =>
-    addDoc(collection(this.firestore, 'cultivos'), {
+  // Guardar a nombre del dueño
+  addCultivo = async (data: Omit<Cultivo, 'id' | 'id_agricultor' | 'estado'>) => {
+    const ownerId = await this.getOwnerId();
+    return addDoc(collection(this.firestore, 'cultivos'), {
       ...data,
-      id_agricultor: this.uid,
+      id_agricultor: ownerId,
       estado: 'activo'
     });
+  }
 
   updateCultivo = (id: string, data: Partial<Cultivo>) =>
     updateDoc(doc(this.firestore, `cultivos/${id}`), data);
@@ -252,11 +258,14 @@ export class DataService {
       )
     );
 
-  addGasto = (data: Omit<Gasto, 'id' | 'id_agricultor'>) =>
-    addDoc(collection(this.firestore, 'gastos'), {
+  // Guardar a nombre del dueño
+  addGasto = async (data: Omit<Gasto, 'id' | 'id_agricultor'>) => {
+    const ownerId = await this.getOwnerId();
+    return addDoc(collection(this.firestore, 'gastos'), {
       ...data,
-      id_agricultor: this.uid
+      id_agricultor: ownerId
     });
+  }
 
   updateGasto = (id: string, data: Partial<Gasto>) =>
     updateDoc(doc(this.firestore, `gastos/${id}`), data);
@@ -264,7 +273,7 @@ export class DataService {
   deleteGasto = (id: string) =>
     deleteDoc(doc(this.firestore, `gastos/${id}`));
 
-  // ==== CRUD de Ventas e ingresos ====
+  // ==== Ventas e Ingresos ====
   getVentas = (): Observable<Venta[]> =>
     this.ownerUid$.pipe(
       switchMap(ownerUid =>
@@ -280,7 +289,7 @@ export class DataService {
       )
     );
 
-  // ==== Registrar venta y actualizar saldo deudor de comprador (transacción) ====
+  // Transacción de Venta (La página ya envía el id_agricultor correcto)
   async addVentaAndUpdateBalance(venta: Omit<Venta, 'id'>) {
     const compradorDocRef = doc(this.firestore, `compradores/${venta.id_comprador}`);
     const ventasCollectionRef = collection(this.firestore, 'ventas');
@@ -298,13 +307,11 @@ export class DataService {
     });
   }
 
-  // ==== Consultar tareas con filtros opcionales ====
+  // ==== Tareas ====
   getTareas(filters: TaskFilters = {}): Observable<Tarea[]> {
     return this.ownerUid$.pipe(
       switchMap(ownerUid => {
-        if (!ownerUid) {
-          return of([]);
-        }
+        if (!ownerUid) return of([]);
 
         const tareasRef = collection(this.firestore, 'tareas');
         const queryConstraints: any[] = [
@@ -312,18 +319,10 @@ export class DataService {
           orderBy('fecha', 'desc')
         ];
 
-        if (filters.fecha_inicio) {
-          queryConstraints.push(where('fecha', '>=', filters.fecha_inicio));
-        }
-        if (filters.fecha_fin) {
-          queryConstraints.push(where('fecha', '<=', filters.fecha_fin));
-        }
-        if (filters.id_trabajador) {
-          queryConstraints.push(where('id_trabajador', '==', filters.id_trabajador));
-        }
-        if (filters.id_cultivo) {
-          queryConstraints.push(where('id_cultivo', '==', filters.id_cultivo));
-        }
+        if (filters.fecha_inicio) queryConstraints.push(where('fecha', '>=', filters.fecha_inicio));
+        if (filters.fecha_fin) queryConstraints.push(where('fecha', '<=', filters.fecha_fin));
+        if (filters.id_trabajador) queryConstraints.push(where('id_trabajador', '==', filters.id_trabajador));
+        if (filters.id_cultivo) queryConstraints.push(where('id_cultivo', '==', filters.id_cultivo));
 
         const q = query(tareasRef, ...queryConstraints);
         return collectionData(q, { idField: 'id' }) as Observable<Tarea[]>;
@@ -331,7 +330,6 @@ export class DataService {
     );
   }
 
-  // ==== Registrar tarea y actualizar saldo acumulado del trabajador (transacción) ====
   async addTaskWithBalanceUpdate(tarea: Omit<Tarea, 'id'>) {
     const tDocRef = doc(this.firestore, `trabajadores/${tarea.id_trabajador}`);
     const taColRef = collection(this.firestore, 'tareas');
@@ -348,7 +346,6 @@ export class DataService {
     });
   }
 
-  // ==== Eliminar tarea y revertir saldo del trabajador (transacción) ====
   async deleteTareaWithBalanceUpdate(tarea: Tarea) {
     const trabajadorDocRef = doc(this.firestore, `trabajadores/${tarea.id_trabajador}`);
     const tareaDocRef = doc(this.firestore, `tareas/${tarea.id!}`);
@@ -363,34 +360,42 @@ export class DataService {
     });
   }
 
-  // ==== Consultar pagos con filtros opcionales ====
+  // ==== PAGOS (CORREGIDO: TIPO Y ORDENAMIENTO) ====
   getPagos(filters: { fecha_inicio?: string; fecha_fin?: string } = {}): Observable<Pago[]> {
     return this.ownerUid$.pipe(
       switchMap(ownerUid => {
-        if (!ownerUid) {
-          return of([]);
-        }
+        if (!ownerUid) return of([]);
 
         const pagosRef = collection(this.firestore, 'pagos');
+        
+        // 1. Consulta ordenada por fecha
         const queryConstraints: any[] = [
           where('id_agricultor', '==', ownerUid),
           orderBy('fecha', 'desc')
         ];
 
-        if (filters.fecha_inicio) {
-          queryConstraints.push(where('fecha', '>=', filters.fecha_inicio));
-        }
-        if (filters.fecha_fin) {
-          queryConstraints.push(where('fecha', '<=', filters.fecha_fin));
-        }
+        if (filters.fecha_inicio) queryConstraints.push(where('fecha', '>=', filters.fecha_inicio));
+        if (filters.fecha_fin) queryConstraints.push(where('fecha', '<=', filters.fecha_fin));
 
         const q = query(pagosRef, ...queryConstraints);
-        return collectionData(q, { idField: 'id' }) as Observable<Pago[]>;
+        
+        // 2. FIX: Forzamos el tipo a Observable<Pago[]> antes del pipe
+        return (collectionData(q, { idField: 'id' }) as Observable<Pago[]>).pipe(
+            map((pagos) => {
+                // 3. Ordenamiento fino en cliente
+                return pagos.sort((a, b) => {
+                    if (a.fecha !== b.fecha) return a.fecha > b.fecha ? -1 : 1;
+                    // Desempate con createdAt
+                    const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    return tB - tA;
+                });
+            })
+        );
       })
     );
   }
 
-  // ==== Registrar pago y actualizar saldo del trabajador (transacción) ====
   async addPaymentAndUpdateBalance(pago: Omit<Pago, 'id'>) {
     const tDocRef = doc(this.firestore, `trabajadores/${pago.id_trabajador}`);
     const pColRef = collection(this.firestore, 'pagos');
@@ -403,11 +408,10 @@ export class DataService {
       t.update(tDocRef, { saldo_acumulado: nS });
 
       const nPRef = doc(pColRef);
-      t.set(nPRef, pago);
+      t.set(nPRef, { ...pago, createdAt: new Date().toISOString() });
     });
   }
 
-  // ==== Eliminar pago y revertir saldo del trabajador (transacción) ====
   async deletePagoWithBalanceUpdate(pago: Pago) {
     const trabajadorDocRef = doc(this.firestore, `trabajadores/${pago.id_trabajador}`);
     const pagoDocRef = doc(this.firestore, `pagos/${pago.id!}`);
@@ -422,7 +426,7 @@ export class DataService {
     });
   }
 
-  // ==== Consultar cobros realizados a un comprador ====
+  // ==== Cobros ====
   getCobros = (id_comprador: string): Observable<Cobro[]> =>
     this.ownerUid$.pipe(
       switchMap(ownerUid =>
@@ -440,7 +444,6 @@ export class DataService {
       )
     );
 
-  // ==== Registrar cobro y actualizar saldo deudor (transacción) ====
   async addCobroAndUpdateBalance(cobro: Omit<Cobro, 'id'>) {
     const cDocRef = doc(this.firestore, `compradores/${cobro.id_comprador}`);
     const coColRef = collection(this.firestore, 'cobros');
@@ -457,7 +460,7 @@ export class DataService {
     });
   }
 
-  // ==== CRUD de Supervisores (solo para admins) ====
+  // ==== Supervisores (Solo Admin) ====
   getSupervisoresByAdmin(adminUid: string): Observable<any[]> {
     const colRef = collection(this.firestore, 'supervisores');
     const q = query(colRef, where('adminUid', '==', adminUid));
@@ -465,8 +468,8 @@ export class DataService {
   }
 
   addSupervisor(data: { nombre: string; email: string; telefono?: string; adminUid: string; }) {
-    const colRef = collection(this.firestore, 'supervisores');
-    return addDoc(colRef, {
+    // Los supervisores siempre se crean ligados al usuario actual (que es Admin)
+    return addDoc(collection(this.firestore, 'supervisores'), {
       ...data,
       createdAt: new Date()
     });

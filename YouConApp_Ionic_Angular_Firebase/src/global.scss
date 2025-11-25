@@ -221,3 +221,34 @@ ion-modal ion-button[type="submit"] {
     color: var(--ion-color-primary);
   }
 }
+
+/* --- AGREGAR AL FINAL DE GLOBAL.SCSS --- */
+
+// Estilo global para Popover (Menú de usuario)
+ion-popover {
+  --width: 250px;
+  
+  ::ng-deep .popover-content {
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+}
+
+/* --- ESTILOS PARA EL MODAL DEL DASHBOARD --- */
+.dashboard-modal {
+  // En Tablet y PC (min-width: 768px), forzamos un tamaño grande
+  @media (min-width: 768px) {
+    --width: 90%;       // Ocupa casi todo el ancho
+    --height: 90%;      // Ocupa casi todo el alto
+    --max-width: 1000px; // Pero que no se pase de 1000px en pantallas gigantes
+    --border-radius: 16px; // Bordes redondeados bonitos
+    
+    // Sombra para que resalte sobre el fondo
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  // Aseguramos que el fondo del modal sea el correcto
+  ion-content {
+    --background: #f4f5f8; 
+  }
+}

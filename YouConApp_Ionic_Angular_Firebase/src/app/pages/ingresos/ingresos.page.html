@@ -1,47 +1,28 @@
-<!-- Header de la página -->
 <ion-header>
-  <!-- Toolbar con color primario -->
   <ion-toolbar color="primary">
-    <!-- Botones en el slot izquierdo (start) -->
     <ion-buttons slot="start">
-      <!-- Botón de retroceso que navega a /home si no hay historial -->
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <!-- Título de la página -->
     <ion-title>Registrar Ingreso (Venta)</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<!-- Contenido principal con padding interno -->
 <ion-content class="ion-padding">
-  <!-- Formulario reactivo vinculado a ventaForm -->
-  <!-- (ngSubmit) ejecuta registrarVenta() al enviar -->
   <form [formGroup]="ventaForm" (ngSubmit)="registrarVenta()">
     
-    <!-- Lista de campos generales de la venta -->
     <ion-list>
-      
-      <!-- Campo select para elegir comprador -->
       <ion-item>
-        <!-- Select vinculado al FormControl 'comprador' -->
-        <!-- * indica que el campo es obligatorio -->
         <ion-select 
           label="Vendido a *" 
           formControlName="comprador" 
           placeholder="Seleccionar comprador">
-          <!-- Itera sobre el observable compradores$ (usando async pipe) -->
-          <!-- Cada comprador se muestra con su nombre -->
-          <!-- [value]="c" almacena el objeto completo del comprador -->
           <ion-select-option *ngFor="let c of (compradores$ | async)" [value]="c">
             {{ c.nombre }}
           </ion-select-option>
         </ion-select>
       </ion-item>
       
-      <!-- Campo de entrada para la fecha de venta -->
       <ion-item>
-        <!-- Input tipo date vinculado al FormControl 'fecha' -->
-        <!-- Muestra la fecha actual por defecto (definida en el constructor) -->
         <ion-input 
           label="Fecha de Venta *" 
           type="date" 
@@ -50,21 +31,12 @@
       </ion-item>
     </ion-list>
     
-    <!-- Sección de items/productos de la venta -->
     <div class="venta-items-section">
-      <!-- FormArrayName conecta con el FormArray 'items' -->
       <div formArrayName="items">
-        <!-- Itera sobre cada FormGroup dentro del FormArray -->
-        <!-- 'i' es el índice usado como formGroupName -->
         <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
           
-          <!-- Divisor visual para separar cada producto -->
           <ion-item-divider>
-            <!-- Etiqueta que muestra el número del producto (i + 1 para empezar en 1) -->
             <ion-label>Producto #{{ i + 1 }}</ion-label>
-            <!-- Botón para eliminar este producto -->
-            <!-- Solo se muestra si hay más de un producto (para no dejar el array vacío) -->
-            <!-- fill="clear" hace que el botón sea transparente -->
             <ion-button 
               fill="clear" 
               color="danger" 
@@ -74,10 +46,7 @@
             </ion-button>
           </ion-item-divider>
           
-          <!-- Input para el tipo/calidad del producto -->
           <ion-item>
-            <!-- FormControlName se conecta al control 'calidad' dentro del FormGroup[i] -->
-            <!-- placeholder da ejemplo de qué ingresar -->
             <ion-input 
               label="Tipo/Calidad" 
               formControlName="calidad" 
@@ -85,38 +54,31 @@
             </ion-input>
           </ion-item>
           
-          <!-- Input para la cantidad vendida -->
           <ion-item>
-            <!-- FormControlName se conecta al control 'cantidad' dentro del FormGroup[i] -->
-            <!-- type="number" permite solo valores numéricos -->
             <ion-input 
               label="Cantidad" 
-              type="number" 
+              type="tel" 
+              inputmode="numeric"
+              (ionInput)="formatMonto($event)"
               formControlName="cantidad" 
               placeholder="Ej: 50">
             </ion-input>
           </ion-item>
-          
-          <!-- Input para el precio unitario del producto -->
+        
           <ion-item>
-            <!-- FormControlName se conecta al control 'precio_unitario' dentro del FormGroup[i] -->
-            <!-- type="number" permite solo valores numéricos -->
-            <!-- El total se calcula automáticamente como cantidad × precio_unitario -->
             <ion-input 
               label="Precio Unitario" 
-              type="number" 
+              type="tel" 
+              inputmode="numeric"
+              (ionInput)="formatMonto($event)"
               formControlName="precio_unitario" 
-              placeholder="Ej: 1500">
+              placeholder="Ej: 1.500">
             </ion-input>
           </ion-item>
     
         </div>
       </div>
       
-      <!-- Botón para añadir un nuevo producto al FormArray -->
-      <!-- Útil cuando se venden múltiples productos/calidades en una misma venta -->
-      <!-- fill="outline" estilo de botón con borde -->
-      <!-- expand="block" hace que ocupe todo el ancho -->
       <ion-button 
         fill="outline" 
         expand="block" 
@@ -126,10 +88,6 @@
       </ion-button>
     </div>
     
-    <!-- Botón de envío del formulario -->
-    <!-- type="submit" hace que dispare el evento (ngSubmit) -->
-    <!-- [disabled] desactiva el botón si el formulario es inválido -->
-    <!-- expand="block" hace que ocupe todo el ancho -->
     <ion-button 
       type="submit" 
       expand="block" 

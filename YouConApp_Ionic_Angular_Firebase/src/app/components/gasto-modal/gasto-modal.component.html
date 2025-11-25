@@ -18,10 +18,24 @@
         <ion-input label="Descripción *" labelPlacement="stacked" formControlName="descripcion" placeholder="Ej: Compra de fertilizante"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-input label="Monto *" labelPlacement="stacked" type="number" formControlName="monto" placeholder="Ej: 75000"></ion-input>
+        <ion-input 
+          label="Monto *" 
+          labelPlacement="stacked" 
+          type="tel" 
+          inputmode="numeric"
+          (ionInput)="formatMonto($event)"
+          formControlName="monto" 
+          placeholder="Ej: 75.000">
+        </ion-input>
       </ion-item>
       <ion-item>
-        <ion-input label="Fecha del Gasto *" labelPlacement="stacked" type="date" formControlName="fecha"></ion-input>
+        <ion-input 
+          label="Fecha del Gasto *" 
+          labelPlacement="stacked" 
+          type="date" 
+          [max]="maxDate"
+          formControlName="fecha">
+        </ion-input>
       </ion-item>
     </ion-list>
     <ion-button 

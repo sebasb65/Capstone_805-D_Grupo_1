@@ -1,20 +1,12 @@
-// Importaciones Angular/Fundaciones del módulo, formularios reactivos, Ionic y reactividad
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
-
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-// Servicios para obtención de datos y generación de PDFs
 import { DataService } from '../../services/data.service';
 import { PdfReportService } from '../../services/pdf-report.service';
 
-/**
- * Página de reportes con filtro por fecha y generación de reportes PDF.
- * Permite alternar entre reportes de pagos, gastos e ingresos.
- */
 @Component({
   selector: 'app-reports',
   templateUrl: './reports.page.html',
@@ -24,23 +16,19 @@ import { PdfReportService } from '../../services/pdf-report.service';
 })
 export class ReportsPage implements OnInit {
 
-  // Formulario reactivo del filtro de rango de fechas
   filterForm!: FormGroup;
-
-  // Estado actual del tipo de reporte seleccionado
   reportType: 'pagos' | 'gastos' | 'ingresos' = 'pagos';
-
-  // Observables para los datos tabulares y los totales
+  
   pagos$!: Observable<any[]>;
   totalPagado$!: Observable<number>;
-
   gastos$!: Observable<any[]>;
   totalGastos$!: Observable<number>;
-
   ingresos$!: Observable<any[]>;
   totalIngresos$!: Observable<number>;
 
-  // Inyección de dependencias (servicios Angular/Ionic), usando inject() (Angular 14+)
+  // Variable para bloquear fechas futuras en HTML (opcional)
+  maxDate: string = new Date().toISOString().split('T')[0];
+
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
   private pdfReportService = inject(PdfReportService);
@@ -49,20 +37,14 @@ export class ReportsPage implements OnInit {
 
   constructor() {}
 
-  /**
-   * Inicializa el formulario, los observables vacíos y la suscripción a cambios de filtro.
-   */
   ngOnInit() {
-    // Formulario con dos inputs requeridos (inicio/fin)
     this.filterForm = this.fb.group({
       fecha_inicio: [null, Validators.required],
       fecha_fin: [null, Validators.required],
     });
 
-    // Inicializa los reportes vacíos
     this.resetReports();
 
-    // Cada vez que cambian fechas, actualiza los reportes. Si alguna fecha está vacía, reinicia.
     this.filterForm.valueChanges.subscribe(({ fecha_inicio, fecha_fin }) => {
       if (fecha_inicio && fecha_fin) {
         this.loadReports(fecha_inicio, fecha_fin);
@@ -72,11 +54,7 @@ export class ReportsPage implements OnInit {
     });
   }
 
-  /**
-   * Prepara los streams de reportes y cálculos de totales según fecha de inicio y fin.
-   */
   private loadReports(fecha_inicio: string, fecha_fin: string) {
-    // Pagos y total de pagos
     this.pagos$ = this.dataService.getPagos({
       fecha_inicio,
       fecha_fin,
@@ -85,7 +63,6 @@ export class ReportsPage implements OnInit {
       map((pagos) => pagos.reduce((sum, p) => sum + (p.monto || 0), 0))
     );
 
-    // Gastos y total de gastos (filtra manualmente por rango usando isInRange)
     this.gastos$ = this.dataService.getGastos().pipe(
       map((gastos: any[]) => gastos.filter(g => this.isInRange(g.fecha, fecha_inicio, fecha_fin)))
     );
@@ -93,7 +70,6 @@ export class ReportsPage implements OnInit {
       map((gastos) => gastos.reduce((sum, g) => sum + (g.monto || 0), 0))
     );
 
-    // Ingresos/ventas y total de ingresos (también filtra por rango manualmente)
     this.ingresos$ = this.dataService.getVentas().pipe(
       map((ventas: any[]) => ventas.filter(v => this.isInRange(v.fecha, fecha_inicio, fecha_fin)))
     );
@@ -102,40 +78,47 @@ export class ReportsPage implements OnInit {
     );
   }
 
-  /**
-   * Reinicia los observables de datos y totales a arreglos/vacío en la UI.
-   */
   private resetReports() {
     this.pagos$ = of([]);
     this.totalPagado$ = of(0);
-
     this.gastos$ = of([]);
     this.totalGastos$ = of(0);
-
     this.ingresos$ = of([]);
     this.totalIngresos$ = of(0);
   }
 
-  /**
-   * Dispara la generación del PDF según el tipo de reporte actual y validación de fechas.
-   */
   async generatePdf() {
-    // Validación básica del formulario antes de generar el PDF
+    // 1. Validar que el formulario tenga datos
     if (this.filterForm.invalid) {
-      this.presentToast('Selecciona el rango de fechas antes de generar el PDF.', 'danger');
+      this.presentToast('Por favor selecciona ambas fechas (inicio y fin).', 'danger');
       return;
     }
 
     const { fecha_inicio, fecha_fin } = this.filterForm.value;
+    
+    // --- VALIDACIONES DE SEGURIDAD ---
+    const yearInicio = new Date(fecha_inicio).getFullYear();
+    const yearFin = new Date(fecha_fin).getFullYear();
+    
+    // 2. Validar años lógicos (Evita el año 1111 o el año 3000)
+    if (yearInicio < 2000 || yearFin > 2100) {
+       this.presentToast('Fechas inválidas. Por favor selecciona un año real.', 'danger');
+       return;
+    }
 
-    // Muestra indicador de carga mientras se genera el reporte
+    // 3. Validar coherencia temporal (Inicio no puede ser después del Fin)
+    if (fecha_inicio > fecha_fin) {
+       this.presentToast('Error: La fecha de inicio es mayor que la fecha de fin.', 'danger');
+       return;
+    }
+    // ---------------------------------
+
     const loading = await this.loadingController.create({
-      message: 'Generando reporte...',
+      message: 'Generando reporte PDF...',
     });
     await loading.present();
 
     try {
-      // Llama al método de PDF según el tipo de reporte
       if (this.reportType === 'pagos') {
         await this.pdfReportService.generatePaymentReport(fecha_inicio, fecha_fin);
       } else if (this.reportType === 'gastos') {
@@ -143,8 +126,10 @@ export class ReportsPage implements OnInit {
       } else if (this.reportType === 'ingresos') {
         await this.pdfReportService.generateIncomeReport(fecha_inicio, fecha_fin);
       }
+      
+      this.presentToast('Reporte descargado con éxito.', 'success');
+
     } catch (error) {
-      // Mensaje de error si ocurre alguna excepción durante la generación
       console.error(error);
       this.presentToast('Ocurrió un error al generar el PDF.', 'danger');
     } finally {
@@ -152,9 +137,6 @@ export class ReportsPage implements OnInit {
     }
   }
 
-  /**
-   * Determina si una fecha está entre dos fechas (inclusive), ajustando los límites.
-   */
   private isInRange(fecha: string, inicio: string, fin: string): boolean {
     if (!fecha) return false;
     const f = new Date(fecha);
@@ -165,15 +147,10 @@ export class ReportsPage implements OnInit {
     return f >= fi && f <= ff;
   }
 
-  /**
-   * Muestra un mensaje toast en la parte inferior, usado para feedback de usuario.
-   * @param message - Texto a mostrar.
-   * @param color - Color ('success' o 'danger').
-   */
   async presentToast(message: string, color: 'success' | 'danger' = 'success') {
     const toast = await this.toastController.create({
       message,
-      duration: 2000,
+      duration: 3000,
       color,
       position: 'bottom',
     });

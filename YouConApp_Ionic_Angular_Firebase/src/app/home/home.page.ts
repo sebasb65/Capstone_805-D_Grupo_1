@@ -74,6 +74,8 @@ export class HomePage implements OnInit {
   async openDashboard() {
     const modal = await this.modalController.create({
       component: DashboardModalComponent,
+      // AGREGAMOS ESTA LÍNEA:
+      cssClass: 'dashboard-modal' 
     });
     await modal.present();
   }

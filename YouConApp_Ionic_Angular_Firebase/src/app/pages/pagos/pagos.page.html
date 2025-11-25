@@ -9,7 +9,9 @@
 
 <ion-content class="ion-padding list-page-content">
   <ion-card>
-    <ion-card-header><ion-card-title>Registrar un Pago</ion-card-title></ion-card-header>
+    <ion-card-header>
+      <ion-card-title>Registrar un Pago</ion-card-title>
+    </ion-card-header>
     <ion-card-content>
       <form [formGroup]="pagoForm" (ngSubmit)="registrarPago()">
         <ion-list>
@@ -20,8 +22,28 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item><ion-input label="Monto a Pagar" label-placement="stacked" type="number" formControlName="monto" placeholder="Ej: 50000"></ion-input></ion-item>
-          <ion-item><ion-input label="Fecha del Pago" label-placement="stacked" type="date" formControlName="fecha"></ion-input></ion-item>
+          
+          <ion-item>
+            <ion-input 
+              label="Monto a Pagar" 
+              label-placement="stacked" 
+              type="tel" 
+              inputmode="numeric"
+              (ionInput)="formatMonto($event)"
+              formControlName="monto" 
+              placeholder="Ej: 50.000">
+            </ion-input>
+          </ion-item>
+          
+          <ion-item>
+            <ion-input 
+              label="Fecha del Pago" 
+              label-placement="stacked" 
+              type="date" 
+              [max]="maxDate"
+              formControlName="fecha">
+            </ion-input>
+          </ion-item>
         </ion-list>
         <ion-button type="submit" expand="block" class="ion-margin-top" [disabled]="pagoForm.invalid">Guardar Pago</ion-button>
       </form>
@@ -40,7 +62,10 @@
         <ion-item-sliding *ngFor="let pago of pagos">
           <ion-item>
             <ion-icon name="cash" slot="start" color="success"></ion-icon>
-            <ion-label><h2>{{ pago.nombre_trabajador }}</h2><p>Monto: {{ pago.monto | currency:'CLP ':'symbol':'1.0-0' }}</p></ion-label>
+            <ion-label>
+              <h2>{{ pago.nombre_trabajador }}</h2>
+              <p>Monto: {{ pago.monto | currency:'CLP ':'symbol':'1.0-0' }}</p>
+            </ion-label>
             <ion-note slot="end" color="medium">{{ pago.fecha | date:'dd/MM/yyyy' }}</ion-note>
           </ion-item>
           <ion-item-options side="end">
@@ -53,7 +78,7 @@
   <ng-template #loadingPagos>
     <ion-list>
         <ion-item *ngFor="let i of [1,2,3]">
-            <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
         </ion-item>
     </ion-list>
   </ng-template>

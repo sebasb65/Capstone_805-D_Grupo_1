@@ -1,43 +1,131 @@
+ion-content {
+  --background: #f4f5f8;
+}
+
 .stat-card {
-  margin: 0;
-  text-align: center;
-  border-left-width: 5px;
-  border-left-style: solid;
-
+  margin: 4px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  background: white;
+  
   ion-card-content {
+    display: flex;
+    align-items: center;
     padding: 16px;
+  }
 
-    ion-label {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--ion-color-secondary);
-    }
+  ion-icon {
+    font-size: 2.2rem;
+    margin-right: 12px;
+    padding: 10px;
+    border-radius: 50%;
+    background: #f0f0f0;
+  }
 
-    h2 {
-      margin: 4px 0 0 0;
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
+  // Colores de fondo para los iconos
+  &.danger ion-icon {
+    background: rgba(var(--ion-color-danger-rgb), 0.1); 
+    color: var(--ion-color-danger);
+  }
+
+  &.warning ion-icon {
+    background: rgba(var(--ion-color-warning-rgb), 0.1); 
+    color: var(--ion-color-warning);
+  }
+
+  &.success ion-icon {
+    background: rgba(var(--ion-color-success-rgb), 0.1); 
+    color: var(--ion-color-success);
+  }
+
+  .data {
+    display: flex;
+    flex-direction: column;
+  }
+
+  ion-label {
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  h2 {
+    margin: 4px 0 0 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--ion-text-color);
   }
 }
 
-// Colores específicos para las tarjetas
-.stat-card.success {
-  border-left-color: var(--ion-color-success);
-  h2 { color: var(--ion-color-success); }
+// Tarjeta Balance
+.stat-card.balance {
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  color: white;
+
+  ion-card-content {
+    justify-content: space-between;
+  }
+
+  .card-icon ion-icon {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 3rem;
+  }
+
+  .card-info {
+    text-align: right;
+    ion-label { color: rgba(255,255,255,0.9); }
+    h1 { margin: 0; font-size: 2rem; font-weight: 800; color: white; }
+  }
+
+  &.negative {
+    background: linear-gradient(135deg, var(--ion-color-danger), var(--ion-color-danger-shade));
+  }
 }
 
-.stat-card.danger {
-  border-left-color: var(--ion-color-danger);
-  h2 { color: var(--ion-color-danger); }
+// Contenedor del Gráfico (OPTIMIZADO PARA CELULAR)
+.chart-container {
+  margin-top: 20px;
+  background: white;
+  border-radius: 16px;
+  
+  // Padding reducido a los lados (8px) para dar más espacio al gráfico
+  padding: 16px 8px; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  
+  // Altura reducida para que quepa mejor en pantallas verticales
+  height: 260px; 
+  
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Evita desbordes
+
+  .chart-title {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ion-color-dark);
+    text-align: center;
+  }
+
+  ngx-charts-bar-vertical {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
 }
 
-.stat-card.balance.positive {
-  background: rgba(var(--ion-color-success-rgb), 0.1);
-  h2 { color: var(--ion-color-success-shade); }
-}
-
-.stat-card.balance.negative {
-  background: rgba(var(--ion-color-danger-rgb), 0.1);
-  h2 { color: var(--ion-color-danger-shade); }
+// Media Query: Si es Tablet/PC, el gráfico crece
+@media (min-width: 768px) {
+  .chart-container {
+    height: 450px;
+    padding: 30px;
+  }
+  
+  .stat-card h2 {
+    font-size: 1.6rem;
+  }
 }

@@ -1,39 +1,22 @@
-// Encabezado de bienvenida
-.welcome-header {
-  padding: 8px 16px;
-  margin-bottom: 24px;
-  
-  h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--ion-text-color);
-  }
-
-  p {
-    font-size: 1rem;
-    color: var(--ion-color-secondary);
-    margin: 0;
-  }
+// Contenedor principal
+.main-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-// Contenedor de la grilla
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 16px;
-}
-
-// Estilo mejorado para las tarjetas de navegación
+// Tarjetas de navegación
 .nav-card {
   margin: 0;
-  border-radius: 16px; // Bordes más redondeados
+  height: 100%;
+  border-radius: 16px;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  background: var(--ion-card-background, #ffffff);
 
-  // Efecto hover para interactividad
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
   }
   
   ion-card-content {
@@ -41,24 +24,53 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px 16px;
-    height: 130px;
+    height: 100%;
+    
+    // --- ESTILOS BASE (CELULAR) ---
+    // Estos tamaños se verán en el teléfono
+    padding: 16px 8px; 
+    min-height: 130px; // Altura compacta para celular
     
     ion-icon {
-      font-size: 2.5rem; // Iconos ligeramente más pequeños
+      font-size: 3rem; // Tamaño normal para celular
       color: var(--ion-color-primary);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     
     ion-label {
       font-weight: 600;
-      font-size: 0.9rem; // Texto un poco más pequeño para que encaje mejor
+      font-size: 0.95rem; // Texto legible en celular
       text-align: center;
+      color: var(--ion-text-color);
     }
   }
 }
 
-// Estilo del menú de usuario
-ion-popover {
-  --width: 250px;
+// --- ESTILOS PARA PANTALLAS GRANDES (TABLET / PC / IPAD) ---
+// Se activan solo si la pantalla mide más de 768px de ancho
+@media (min-width: 768px) {
+  .nav-card ion-card-content {
+    padding: 30px 16px;
+    min-height: 180px; // Tarjetas más altas
+
+    ion-icon {
+      font-size: 5rem; // Iconos GIGANTES
+      margin-bottom: 16px;
+    }
+
+    ion-label {
+      font-size: 1.2rem; // Texto más grande
+      font-weight: 700;
+    }
+  }
+}
+
+ion-grid {
+  --ion-grid-column-padding: 8px; // Espacio normal en celular
+  padding: 0;
+
+  // Espacio más grande entre tarjetas solo en pantallas grandes
+  @media (min-width: 768px) {
+    --ion-grid-column-padding: 12px; 
+  }
 }

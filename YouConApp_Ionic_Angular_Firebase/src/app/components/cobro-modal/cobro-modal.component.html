@@ -14,8 +14,11 @@
         <ion-input
           label="Monto Cobrado"
           labelPlacement="floating"
-          type="number"
+          type="tel"
+          inputmode="numeric"
+          (ionInput)="formatMonto($event)"
           formControlName="monto"
+          placeholder="Ej: 1.500.000"
           required>
         </ion-input>
       </ion-item>
@@ -24,6 +27,7 @@
           label="Fecha del Cobro"
           labelPlacement="floating"
           type="date"
+          [max]="maxDate"
           formControlName="fecha"
           required>
         </ion-input>

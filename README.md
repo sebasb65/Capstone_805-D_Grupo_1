@@ -80,7 +80,7 @@ El sistema utiliza un modelo de documentos JSON en **Cloud Firestore**, optimiza
 * Ionic CLI (`npm install -g @ionic/cli`)
 * Cuenta de Firebase configurada.
 
-### 1. Clonar el Repositorio
+## 1. Clonar el Repositorio
 Comandos:
 git clone [Link Repositorio]
 cd Capstone_805-D_Grupo_1
@@ -114,13 +114,13 @@ ionic serve
 ## 5. Generar APK (Android)
 Comandos:
 
-# Compilar proyecto web
+### Compilar proyecto web
 ionic build --prod
 
-# Sincronizar con Android
+### Sincronizar con Android
 npx cap sync
 
-# Abrir Android Studio
+### Abrir Android Studio
 npx cap open android
 (Desde Android Studio: Build -> Build Bundle(s) / APK(s) -> Build APK)
 

@@ -1,6 +1,8 @@
 # YouConApp: Sistema de Gestión Integral para Contratistas Agrícolas
 
-<img src="https://github.com/user-attachments/assets/564782a5-b403-4515-bc50-c6d45585fe8b" alt="Logo-YouConAPP" width="200" />
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/564782a5-b403-4515-bc50-c6d45585fe8b" alt="Logo-YouConAPP" width="250" />
+</div>
 
 > **Proyecto Capstone - Ingeniería en Informática**
 > *Digitalizando la gestión del agro chileno.*
